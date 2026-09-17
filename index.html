@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daniel Štorcel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0b;
+    --bg-alt:#111113;
+    --surface:#16171a;
+    --line: rgba(242,242,239,0.10);
+    --line-strong: rgba(242,242,239,0.18);
+    --text:#f2f2ef;
+    --text-dim:#98989d;
+    --text-faint:#5c5c60;
+    --green:#b8ff3d;
+    --green-dim:#3a4a26;
+    --green-glow: rgba(184,255,61,0.18);
+    --serif-display: 'Bebas Neue', sans-serif;
+    --sans: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  :root:not([data-theme="light"]){ color-scheme: dark; }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="light"]){ /* brand is intentionally dark-only */ }
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{ background:var(--green); color:#0a0a0b; }
+  img{ max-width:100%; display:block; }
+  a{ color:inherit; }
+  .wrap{ max-width:1200px; margin:0 auto; padding-inline: clamp(20px, 5vw, 64px); }
+  section{ position:relative; }
+  .hair{ height:1px; background:var(--line); border:none; }
+
+  /* ---------- Grain overlay ---------- */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:60; opacity:0.035; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- Nav ---------- */
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    padding: 18px clamp(20px,5vw,64px);
+    display:flex; align-items:center; justify-content:space-between;
+    background:linear-gradient(to bottom, rgba(10,10,11,0.85), rgba(10,10,11,0));
+    backdrop-filter: blur(6px);
+    transition: background .3s ease, border-color .3s ease;
+    border-bottom: 1px solid transparent;
+  }
+  header.scrolled{ background:rgba(10,10,11,0.82); border-bottom-color:var(--line); }
+  .logo{ font-family:var(--mono); font-size:14px; letter-spacing:0.04em; color:var(--text); text-decoration:none; }
+  .logo span{ color:var(--green); }
+  nav.desktop{ display:flex; gap:32px; list-style:none; }
+  nav.desktop a{
+    font-family:var(--mono); font-size:12.5px; text-decoration:none; color:var(--text-dim);
+    position:relative; padding-bottom:3px; transition:color .25s ease;
+  }
+  nav.desktop a:hover, nav.desktop a:focus-visible{ color:var(--text); }
+  nav.desktop a::after{
+    content:''; position:absolute; left:0; right:0; bottom:0; height:1px; background:var(--green);
+    transform:scaleX(0); transform-origin:left; transition:transform .3s ease;
+  }
+  nav.desktop a:hover::after, nav.desktop a:focus-visible::after{ transform:scaleX(1); }
+
+  .burger{ display:none; background:none; border:1px solid var(--line-strong); width:42px; height:42px; border-radius:2px; cursor:pointer; align-items:center; justify-content:center; }
+  .burger span, .burger span::before, .burger span::after{
+    content:''; display:block; width:18px; height:1.5px; background:var(--text); position:relative; transition:transform .25s ease, opacity .25s ease;
+  }
+  .burger span::before{ position:absolute; top:-6px; }
+  .burger span::after{ position:absolute; top:6px; }
+  .burger.open span{ background:transparent; }
+  .burger.open span::before{ transform:rotate(45deg); top:0; }
+  .burger.open span::after{ transform:rotate(-45deg); top:0; }
+
+  .mobile-menu{
+    position:fixed; inset:0; z-index:45; background:var(--bg);
+    display:flex; flex-direction:column; justify-content:center; gap:22px; padding: 0 32px;
+    transform:translateY(-100%); transition:transform .4s cubic-bezier(.77,0,.18,1);
+  }
+  .mobile-menu.open{ transform:translateY(0); }
+  .mobile-menu a{ font-family:var(--serif-display); font-size:44px; letter-spacing:0.01em; text-decoration:none; color:var(--text); }
+  .mobile-menu .idx{ font-family:var(--mono); color:var(--green); font-size:12px; margin-right:10px; }
+
+  @media (max-width:860px){
+    nav.desktop{ display:none; }
+    .burger{ display:flex; }
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    min-height:100svh; display:flex; flex-direction:column; justify-content:flex-end;
+    padding: 140px clamp(20px,5vw,64px) 60px;
+    overflow:hidden; isolation:isolate;
+  }
+  .hero-photo{
+    position:absolute; inset:0 0 0 auto; z-index:-2; width:min(62vw, 960px); height:100%;
+    object-fit:cover; object-position:60% center; opacity:0.84;
+    filter:saturate(0.9) contrast(1.05);
+  }
+  .hero::before{
+    content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+    background:linear-gradient(90deg, var(--bg) 0%, rgba(10,10,11,0.96) 26%, rgba(10,10,11,0.50) 58%, rgba(10,10,11,0.10) 100%),
+      linear-gradient(0deg, rgba(10,10,11,0.92) 0%, rgba(10,10,11,0.05) 48%, rgba(10,10,11,0.42) 100%);
+  }
+  .topo{ position:absolute; inset:0; z-index:0; opacity:0.55; pointer-events:none; }
+  .topo path{ fill:none; stroke:var(--line-strong); stroke-width:1; }
+  .topo path.accent{ stroke:var(--green); opacity:0.5; }
+
+  .hero-content{ position:relative; z-index:2; }
+  .hero-eyebrow{
+    font-family:var(--mono); font-size:12.5px; color:var(--text-dim); letter-spacing:0.03em;
+    display:flex; align-items:center; gap:10px; margin-bottom:22px;
+  }
+  .hero-eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 10px var(--green); }
+
+  h1.name{
+    font-family:var(--serif-display);
+    font-size:clamp(58px, 12vw, 168px);
+    line-height:0.86;
+    letter-spacing:0.005em;
+    color:var(--text);
+  }
+  h1.name .last{ color:transparent; -webkit-text-stroke:1.5px var(--text); }
+
+  .hero-sub{
+    max-width:640px; margin-top:28px;
+    font-size:clamp(16px,2vw,19px); line-height:1.55; color:var(--text-dim);
+  }
+  .hero-sub b{ color:var(--text); font-weight:600; }
+
+  .hero-tags{ display:flex; flex-wrap:wrap; gap:10px; margin-top:34px; }
+  .hero-tags span{
+    font-family:var(--mono); font-size:11.5px; color:var(--text-dim);
+    border:1px solid var(--line-strong); padding:6px 12px; border-radius:100px;
+  }
+
+  .scroll-cue{
+    position:absolute; bottom:28px; right:clamp(20px,5vw,64px); z-index:2;
+    display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:11px; color:var(--text-faint);
+  }
+  @media (max-width:700px){
+    .hero{ padding-bottom:84px; }
+    .hero-photo{ width:100%; object-position:62% center; opacity:0.62; }
+    .hero::before{
+      background:linear-gradient(90deg, rgba(10,10,11,0.92) 0%, rgba(10,10,11,0.60) 100%),
+        linear-gradient(0deg, rgba(10,10,11,0.96) 0%, rgba(10,10,11,0.15) 66%, rgba(10,10,11,0.65) 100%);
+    }
+  }
+  .scroll-cue .track{ width:1px; height:34px; background:var(--line-strong); position:relative; overflow:hidden; }
+  .scroll-cue .track::after{
+    content:''; position:absolute; top:-100%; left:0; width:100%; height:100%; background:var(--green);
+    animation: scrolldrop 2.2s ease-in-out infinite;
+  }
+  @keyframes scrolldrop{ 0%{top:-100%;} 60%{top:100%;} 100%{top:100%;} }
+  @media (prefers-reduced-motion: reduce){ .scroll-cue .track::after{ animation:none; top:0; } }
+
+  /* ---------- Section heads ---------- */
+  .head{
+    display:grid; grid-template-columns: 1fr; gap:14px; margin-bottom:56px;
+  }
+  .head .index{ font-family:var(--mono); font-size:12px; color:var(--green); }
+  .head h2{
+    font-family:var(--serif-display); font-size:clamp(38px,5.5vw,64px); font-weight:400; letter-spacing:0.005em; line-height:1;
+  }
+  .head p{ color:var(--text-dim); max-width:480px; font-size:15.5px; line-height:1.6; }
+
+  section.pad{ padding:120px 0; }
+  @media (max-width:700px){ section.pad{ padding:80px 0; } }
+
+  /* ---------- About ---------- */
+  .about-grid{ display:grid; grid-template-columns: 0.8fr 1.2fr; gap:64px; }
+  @media (max-width:860px){ .about-grid{ grid-template-columns:1fr; gap:40px; } }
+  .about-copy p{ font-size:18px; line-height:1.75; color:var(--text); max-width:620px; }
+  .about-copy p + p{ margin-top:22px; color:var(--text-dim); font-size:16px; }
+  .traits{ display:flex; flex-wrap:wrap; gap:9px; margin-top:36px; }
+  .traits span{
+    font-family:var(--mono); font-size:11.5px; color:var(--text-dim); border:1px solid var(--line);
+    padding:7px 13px; border-radius:3px; transition: border-color .25s ease, color .25s ease;
+  }
+  .traits span:hover{ border-color:var(--green); color:var(--text); }
+  .about-sticky{ position:sticky; top:120px; align-self:start; }
+  .about-sticky .kicker{ font-family:var(--mono); font-size:12px; color:var(--green); margin-bottom:16px; display:block; }
+  .interest-list{ display:flex; flex-direction:column; gap:0; }
+  .interest-list div{
+    padding:14px 0; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:13px; color:var(--text-dim);
+    display:flex; justify-content:space-between;
+  }
+  .interest-list div span:last-child{ color:var(--text-faint); }
+
+  /* ---------- Achievements ---------- */
+  .ach-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  @media (max-width:700px){ .ach-grid{ grid-template-columns:1fr; } }
+  .ach-card{ background:var(--bg); padding:36px 32px; position:relative; }
+  .ach-card::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--green); transform:scaleY(0); transform-origin:top; transition:transform .5s ease; }
+  .ach-card.reveal::before{ transform:scaleY(1); }
+  .ach-stat{ font-family:var(--serif-display); font-size:56px; color:var(--green); line-height:1; }
+  .ach-title{ font-size:16px; font-weight:600; margin-top:16px; }
+  .ach-desc{ font-size:14px; color:var(--text-dim); margin-top:8px; line-height:1.55; max-width:360px; }
+
+  /* ---------- Projects ---------- */
+  .proj-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:24px; }
+  @media (max-width:860px){ .proj-grid{ grid-template-columns:1fr; } }
+  .proj-card{
+    border:1px solid var(--line); padding:32px; display:flex; flex-direction:column; height:100%;
+    transition:border-color .3s ease, background .3s ease;
+  }
+  .proj-card:hover{ border-color:var(--line-strong); background:var(--bg-alt); }
+  .proj-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .proj-name{ font-family:var(--serif-display); font-size:32px; letter-spacing:0.01em; }
+  .status{
+    font-family:var(--mono); font-size:10.5px; color:var(--green); border:1px solid var(--green-dim); background:rgba(184,255,61,0.06);
+    padding:4px 10px; border-radius:100px; white-space:nowrap; margin-top:6px;
+  }
+  .proj-desc{ margin-top:14px; color:var(--text-dim); font-size:14.5px; line-height:1.6; flex:1; }
+  .proj-contrib{ margin-top:16px; font-size:13px; color:var(--text-faint); }
+  .proj-contrib b{ color:var(--text-dim); font-weight:500; }
+  .proj-skills{ display:flex; flex-wrap:wrap; gap:7px; margin-top:18px; }
+  .proj-skills span{ font-family:var(--mono); font-size:10.5px; color:var(--text-dim); border:1px solid var(--line); padding:4px 9px; border-radius:3px; }
+  .proj-link{ margin-top:18px; font-family:var(--mono); font-size:12px; color:var(--green); text-decoration:none; display:inline-flex; gap:6px; align-items:center; width:fit-content; }
+
+  /* ---------- Research ---------- */
+  .research{ background:var(--bg-alt); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .research-grid{ display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start; }
+  @media (max-width:860px){ .research-grid{ grid-template-columns:1fr; gap:44px; } }
+  .research-topic{
+    font-family:var(--mono); font-size:13px; line-height:1.7; color:var(--text-dim); border-left:2px solid var(--green);
+    padding-left:18px; margin-top:8px;
+  }
+  .research-meta{ display:flex; flex-wrap:wrap; gap:8px; margin-top:24px; }
+  .research-meta span{ font-family:var(--mono); font-size:10.5px; color:var(--green); border:1px solid var(--green-dim); padding:4px 10px; border-radius:3px; }
+  .process{ display:flex; flex-direction:column; }
+  .process-step{ display:grid; grid-template-columns:28px 1fr; gap:16px; padding:18px 0; border-bottom:1px solid var(--line); }
+  .process-step:last-child{ border-bottom:none; }
+  .process-step .n{ font-family:var(--mono); font-size:12px; color:var(--text-faint); padding-top:3px; }
+  .process-step .t{ font-size:15px; font-weight:600; }
+  .process-step .d{ font-size:13.5px; color:var(--text-dim); margin-top:4px; line-height:1.55; }
+  .fib-table{ margin-top:26px; font-family:var(--mono); font-size:11.5px; color:var(--text-faint); line-height:2; }
+  .fib-table .row{ display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding:6px 0; }
+
+  /* ---------- Summit ---------- */
+  .summit{ background:#050506; position:relative; overflow:hidden; }
+  .summit-peak{
+    font-family:var(--serif-display); font-size:clamp(48px,10vw,140px); line-height:0.9; color:transparent;
+    -webkit-text-stroke:1.5px var(--green); text-align:center; margin: 10px 0 4px;
+  }
+  .summit-sub{ text-align:center; color:var(--text-dim); font-size:15px; max-width:520px; margin:0 auto; line-height:1.6; }
+  .summit-gallery{
+    position:relative; width:min(100%, 520px); height:clamp(420px, 66vh, 680px);
+    max-width:none; margin:46px auto 0;
+  }
+  .summit-photo{
+    position:absolute; inset:0; width:100%; height:100%; margin:0;
+    overflow:hidden; border:1px solid var(--line-strong); background:var(--bg);
+  }
+  .summit-photo img{
+    position:absolute; top:50%; left:50%; width:133.333%; max-width:none; height:75%;
+    object-fit:cover; object-position:center; transform:translate(-50%, -50%) rotate(90deg);
+    filter:saturate(0.82) contrast(1.06);
+  }
+  .summit-photo--upright img{ width:100%; height:100%; transform:translate(-50%, -50%); }
+  .summit-gallery:not(.scroll-ready) .summit-photo:not(:first-child){ display:none; }
+  .summit-descriptions{ position:absolute; inset:0; pointer-events:none; z-index:5; }
+  .summit-description{ position:absolute; inset:0; opacity:0; visibility:hidden; }
+  .summit-description:first-child{ opacity:1; visibility:visible; }
+  .summit-description span{
+    position:absolute; top:50%; transform:translateY(-50%); font-family:var(--serif-display);
+    font-size:clamp(28px, 4.2vw, 62px); line-height:0.9; letter-spacing:0.02em; color:var(--green);
+    text-shadow:0 0 20px var(--green-glow); white-space:nowrap;
+  }
+  .summit-description .left{ right:calc(100% + 72px); text-align:right; }
+  .summit-description .right{ left:calc(100% + 140px); }
+  .summit-scroll-hint{
+    position:absolute; left:50%; bottom:18px; z-index:6; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:6px; font-family:var(--mono);
+    font-size:9px; letter-spacing:0.13em; color:var(--green); white-space:nowrap;
+    text-shadow:0 0 14px var(--green-glow);
+  }
+  .summit-scroll-hint .arrow{
+    width:8px; height:8px; border-right:1.5px solid var(--green); border-bottom:1.5px solid var(--green);
+    transform:rotate(45deg); animation:summit-scroll-hint 1.5s ease-in-out infinite;
+  }
+  @keyframes summit-scroll-hint{
+    0%,100%{ transform:rotate(45deg) translate(0, 0); opacity:0.45; }
+    50%{ transform:rotate(45deg) translate(3px, 3px); opacity:1; }
+  }
+  .summit-photo::after{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(0deg, rgba(5,5,6,0.62), transparent 42%);
+  }
+  .summit-photo figcaption{
+    position:absolute; left:18px; bottom:15px; z-index:1; font-family:var(--mono); font-size:10.5px;
+    letter-spacing:0.08em; color:var(--text); text-transform:uppercase;
+  }
+  @media (max-width:600px){
+    .summit-gallery{ width:min(100%, 360px); height:min(66svh, 540px); margin:72px auto 0; }
+    .summit-description span{ top:-35px; transform:none; font-size:clamp(22px, 8vw, 38px); }
+    .summit-description .left{ right:auto; left:0; }
+    .summit-description .right{ left:auto; right:0; }
+  }
+  @media (prefers-reduced-motion: reduce){ .summit-scroll-hint .arrow{ animation:none; } }
+  .summit-line{ display:flex; justify-content:center; align-items:center; gap:14px; margin:70px 0; flex-wrap:wrap; }
+  .peak-node{ text-align:center; min-width:120px; }
+  .peak-node .dot{ width:11px; height:11px; border-radius:50%; margin:0 auto 10px; border:1.5px solid var(--text-dim); }
+  .peak-node.done .dot{ background:var(--green); border-color:var(--green); box-shadow:0 0 12px var(--green-glow); }
+  .peak-node.goal .dot{ border-color:var(--green); border-style:dashed; }
+  .peak-node .name{ font-family:var(--mono); font-size:12px; color:var(--text); }
+  .peak-node .tag{ font-family:var(--mono); font-size:10px; color:var(--text-faint); margin-top:3px; }
+  .peak-conn{ width:60px; height:1px; background:var(--line-strong); margin-top:-24px; }
+  @media (max-width:700px){ .peak-conn{ width:26px; } }
+
+  .stat-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-top:64px; }
+  @media (max-width:700px){ .stat-row{ grid-template-columns:1fr; } }
+  .stat-cell{ background:#050506; padding:30px 28px; }
+  .stat-num{ font-family:var(--serif-display); font-size:40px; color:var(--text); }
+  .stat-label{ font-family:var(--mono); font-size:11px; color:var(--text-faint); margin-top:8px; }
+
+  .prep{ margin-top:64px; display:grid; grid-template-columns:repeat(2,1fr); gap:10px 40px; max-width:720px; margin-inline:auto; }
+  @media (max-width:600px){ .prep{ grid-template-columns:1fr; } }
+  .prep div{ font-family:var(--mono); font-size:12.5px; color:var(--text-dim); padding:9px 0; border-bottom:1px solid var(--line); display:flex; gap:10px; }
+  .prep div::before{ content:'—'; color:var(--green); }
+  .partners{ text-align:center; margin-top:50px; font-family:var(--mono); font-size:11.5px; color:var(--text-faint); line-height:1.9; }
+  .partners b{ color:var(--text-dim); font-weight:500; }
+
+  /* ---------- Skills ---------- */
+  .skill-cols{ display:grid; grid-template-columns:repeat(4,1fr); gap:40px; }
+  @media (max-width:900px){ .skill-cols{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:520px){ .skill-cols{ grid-template-columns:1fr; } }
+  .skill-col h3{ font-family:var(--mono); font-size:12px; color:var(--green); margin-bottom:18px; }
+  .skill-col .tag{
+    display:block; font-size:14.5px; color:var(--text-dim); padding:9px 0; border-bottom:1px solid var(--line);
+  }
+
+  /* ---------- Experience ---------- */
+  .exp-row{ display:grid; grid-template-columns:180px 1fr; gap:24px; padding:26px 0; border-bottom:1px solid var(--line); }
+  @media (max-width:600px){ .exp-row{ grid-template-columns:1fr; gap:8px; } }
+  .exp-row:first-child{ border-top:1px solid var(--line); }
+  .exp-role{ font-family:var(--mono); font-size:12px; color:var(--text-faint); }
+  .exp-title{ font-size:17px; font-weight:600; }
+  .exp-desc{ color:var(--text-dim); font-size:14px; margin-top:6px; line-height:1.6; max-width:560px; }
+
+  /* ---------- Contact ---------- */
+  .contact{ text-align:center; padding:140px 0 90px; }
+  .contact h2{
+    font-family:var(--serif-display); font-size:clamp(40px,9vw,110px); line-height:0.95; max-width:900px; margin:0 auto;
+  }
+  .contact-links{ display:flex; justify-content:center; gap:38px; margin-top:48px; flex-wrap:wrap; }
+  .contact-links a{
+    font-family:var(--mono); font-size:14px; color:var(--text-dim); text-decoration:none; border-bottom:1px solid var(--line-strong);
+    padding-bottom:4px; transition:color .25s ease, border-color .25s ease;
+  }
+  .contact-links a:hover{ color:var(--green); border-color:var(--green); }
+
+  footer{ border-top:1px solid var(--line); padding:28px clamp(20px,5vw,64px); display:flex; justify-content:space-between; font-family:var(--mono); font-size:11px; color:var(--text-faint); flex-wrap:wrap; gap:10px; }
+
+  .reveal-el{ opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal-el.in{ opacity:1; transform:translateY(0); }
+  @media (prefers-reduced-motion: reduce){ .reveal-el{ opacity:1; transform:none; transition:none; } }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<header id="siteHeader">
+  <a href="#top" class="logo">D<span>.</span>Š<span>.</span></a>
+  <nav class="desktop">
+    <a href="#about">About</a>
+    <a href="#achievements">Record</a>
+    <a href="#work">Work</a>
+    <a href="#research">Research</a>
+    <a href="#summit">Summit</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <button class="burger" id="burgerBtn" aria-label="Open menu" aria-expanded="false"><span></span></button>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#about"><span class="idx">01</span>About</a>
+  <a href="#achievements"><span class="idx">02</span>Record</a>
+  <a href="#work"><span class="idx">03</span>Work</a>
+  <a href="#research"><span class="idx">04</span>Research</a>
+  <a href="#summit"><span class="idx">05</span>Summit</a>
+  <a href="#contact"><span class="idx">06</span>Contact</a>
+</div>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <img class="hero-photo" src="hero-daniel.jpg" alt="Daniel Štorcel by a canal at night">
+    <svg class="topo" id="topoSvg" viewBox="0 0 1200 800" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <div class="hero-content">
+      <div class="hero-eyebrow"><span class="dot"></span>Bratislava, Slovakia — final year</div>
+      <h1 class="name">DANIEL<br><span class="last">ŠTORCEL</span></h1>
+      <p class="hero-sub">
+        Two years in Slovakia's <b>Top 5</b> for critical thinking. A research project at the <b>Slovak Academy of Sciences</b>.
+        A startup with a dragon on it. A mountain that isn't climbed yet.
+      </p>
+      <div class="hero-tags">
+        <span>Technology</span><span>AI</span><span>Entrepreneurship</span><span>Research</span><span>Mountains</span>
+      </div>
+    </div>
+    <div class="scroll-cue"><div class="track"></div>SCROLL</div>
+  </section>
+
+  <hr class="hair">
+
+  <!-- ABOUT -->
+  <section class="pad" id="about">
+    <div class="wrap about-grid">
+      <div class="about-sticky reveal-el">
+        <span class="kicker">// 01 — About</span>
+        <div class="interest-list">
+          <div><span>Tech &amp; AI</span><span>curious</span></div>
+          <div><span>Marketing &amp; brand</span><span>hands-on</span></div>
+          <div><span>Science &amp; research</span><span>SAV</span></div>
+          <div><span>Mountains</span><span>ongoing</span></div>
+        </div>
+      </div>
+      <div class="about-copy">
+        <p class="reveal-el">
+          I like figuring things out that aren't on the curriculum. Some weeks that's a Python script or a cybersecurity
+          rabbit hole; other weeks it's a pitch deck, a training plan, or the chemistry of a thin film under a microscope.
+          I don't think of these as separate lanes — they're just what I'm curious about that month.
+        </p>
+        <p class="reveal-el">
+          I'm competitive by nature and calm under pressure — I've worked warehouse shifts and bartended festivals,
+          led a marketing track on an international team, and sat with lab equipment for hours getting a sample right.
+          What connects it is the same instinct: build it, test it, see if it holds up.
+        </p>
+        <div class="traits reveal-el">
+          <span>Ambitious</span><span>Curious</span><span>Team-oriented</span><span>Resilient</span>
+          <span>Competitive</span><span>Self-motivated</span><span>Entrepreneurial</span><span>Works well under pressure</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="hair">
+
+  <!-- ACHIEVEMENTS -->
+  <section class="pad" id="achievements">
+    <div class="wrap">
+      <div class="head">
+        <span class="index">// 02</span>
+        <h2>Track record</h2>
+        <p>Competitions I've shown up for, across reasoning, business, and innovation.</p>
+      </div>
+      <div class="ach-grid">
+        <div class="ach-card reveal-el">
+          <div class="ach-stat">Top 5</div>
+          <div class="ach-title">Slovak Critical Thinking Competition</div>
+          <div class="ach-desc">Placed in the national Top 5 two years in a row — reasoning and analysis under time pressure.</div>
+        </div>
+        <div class="ach-card reveal-el">
+          <div class="ach-stat">1st</div>
+          <div class="ach-title">European Statistics Competition</div>
+          <div class="ach-desc">1st place in Slovakia, plus a result at European level.</div>
+        </div>
+        <div class="ach-card reveal-el">
+          <div class="ach-stat">1st</div>
+          <div class="ach-title">JA Europe Foodathon</div>
+          <div class="ach-desc">Innovation Award, international round — marketing, finance and presentation for our team's concept.</div>
+        </div>
+        <div class="ach-card reveal-el">
+          <div class="ach-stat">3rd</div>
+          <div class="ach-title">European Business Challenge</div>
+          <div class="ach-desc">3rd in the Slovak round, 3rd overall in the European final.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="hair">
+
+  <!-- PROJECTS -->
+  <section class="pad" id="work">
+    <div class="wrap">
+      <div class="head">
+        <span class="index">// 03</span>
+        <h2>Things I've built</h2>
+        <p>Startup concepts, brand experiments, and ideas I keep coming back to.</p>
+      </div>
+      <div class="proj-grid">
+
+        <div class="proj-card reveal-el">
+          <div class="proj-top">
+            <div class="proj-name">CarbonTrail</div>
+            <span class="status">Award-winning</span>
+          </div>
+          <p class="proj-desc">A student innovation concept built with a team in under a weekend for JA Europe Foodathon, refined with a mentor into a pitch-ready product.</p>
+          <p class="proj-contrib"><b>My part:</b> marketing, finance, the promo video, and communicating with our African counterparts on the team.</p>
+          <div class="proj-skills"><span>Marketing</span><span>Finance</span><span>Video</span><span>Pitching</span></div>
+        </div>
+
+        <div class="proj-card reveal-el">
+          <div class="proj-top">
+            <div class="proj-name">Grynade</div>
+            <span class="status">Student project</span>
+          </div>
+          <p class="proj-desc">A hardcore preworkout brand concept — neon green, black, a grenade and a dragon. "STAY LOCKED IN." Built to learn branding and social growth by doing it.</p>
+          <p class="proj-contrib"><b>My part:</b> identity, TikTok strategy, and a "Veiny Galaxy" campaign that pulled ~10k likes.</p>
+          <div class="proj-skills"><span>Branding</span><span>TikTok</span><span>Social growth</span></div>
+          <a class="proj-link" href="https://grynade.store" target="_blank" rel="noopener">grynade.store ↗</a>
+        </div>
+
+        <div class="proj-card reveal-el">
+          <div class="proj-top">
+            <div class="proj-name">TARO</div>
+            <span class="status">Concept</span>
+          </div>
+          <p class="proj-desc">A non-profit concept connecting Erasmus+, international students, and mountain expeditions — community and personal growth through adventure.</p>
+          <p class="proj-contrib"><b>My part:</b> the concept and a distinct visual identity for its site.</p>
+          <div class="proj-skills"><span>Concept design</span><span>Web identity</span><span>Community</span></div>
+        </div>
+
+        <div class="proj-card reveal-el">
+          <div class="proj-top">
+            <div class="proj-name">AI × Mountains</div>
+            <span class="status">Idea</span>
+          </div>
+          <p class="proj-desc">A platform idea for hikers and mountaineers — surfacing suitable routes, outdoor experiences, and discounted gear across stores using AI.</p>
+          <p class="proj-contrib"><b>My part:</b> the original idea, unbuilt so far.</p>
+          <div class="proj-skills"><span>AI</span><span>Outdoor</span><span>Product thinking</span></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- RESEARCH -->
+  <section class="pad research" id="research">
+    <div class="wrap research-grid">
+      <div>
+        <div class="head" style="margin-bottom:24px;">
+          <span class="index">// 04</span>
+          <h2>Research at SAV</h2>
+        </div>
+        <p class="research-topic reveal-el">
+          "Influence of deposition of atomic layers of zinc oxide on the structure of a carbon-silicon electrode"
+          — a project carried out at the Slovak Academy of Sciences.
+        </p>
+        <div class="research-meta reveal-el">
+          <span>ALD · ZnO</span><span>FIB cross-sections</span><span>EDX analysis</span><span>10 vs 20 cycles</span>
+        </div>
+        <div class="fib-table reveal-el">
+          <div class="row"><span>30 × 20 × 20 µm</span><span>50 nA</span></div>
+          <div class="row"><span>30 × 5 × 5 µm</span><span>30 nA</span></div>
+          <div class="row"><span>30 × 2.5 × 5 µm</span><span>15 nA</span></div>
+          <div class="row"><span>30 × 1.7 × 3 µm</span><span>7 nA</span></div>
+          <div class="row"><span>30 × 1.7 × 2 µm</span><span>5 nA</span></div>
+        </div>
+      </div>
+      <div class="process reveal-el">
+        <div class="process-step">
+          <div class="n">01</div>
+          <div><div class="t">Question</div><div class="d">Does an ALD-deposited ZnO layer change the structure of a silicon-graphite electrode, and how?</div></div>
+        </div>
+        <div class="process-step">
+          <div class="n">02</div>
+          <div><div class="t">Experiment</div><div class="d">Prepared FIB cross-sections at varying beam currents and cut sizes, comparing samples after 10 and 20 ALD cycles.</div></div>
+        </div>
+        <div class="process-step">
+          <div class="n">03</div>
+          <div><div class="t">Analysis</div><div class="d">Examined the cross-sections with EDX to read composition and layer structure.</div></div>
+        </div>
+        <div class="process-step">
+          <div class="n">04</div>
+          <div><div class="t">Presented as</div><div class="d">A SOČ (student scientific research) project, written up at a research-institute level.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUMMIT -->
+  <section class="pad summit" id="summit">
+    <div class="wrap">
+      <div style="text-align:center;">
+        <span class="index" style="display:block; margin-bottom:10px;">// 05</span>
+        <div class="summit-peak reveal-el">MONT BLANC</div>
+        <p class="summit-sub reveal-el">Some things get measured in grades. This one gets measured in altitude — and it isn't climbed yet. The goal is next summer.</p>
+      </div>
+
+      <div class="summit-gallery">
+        <div class="summit-descriptions" aria-live="polite">
+          <div class="summit-description"><span class="left">Gerlachovský</span><span class="right">štít</span></div>
+          <div class="summit-description"><span class="left">Kôprovský</span><span class="right">štít</span></div>
+          <div class="summit-description"><span class="left">Velická</span><span class="right">próba</span></div>
+        </div>
+        <figure class="summit-photo">
+          <img src="mountain-summit.jpg" alt="Daniel Štorcel on a rocky mountain summit">
+        </figure>
+        <figure class="summit-photo summit-photo--upright">
+          <img src="mountain-lake.jpg" alt="Daniel Štorcel above a mountain lake">
+        </figure>
+        <figure class="summit-photo">
+          <img src="mountain-view.jpg" alt="Daniel Štorcel looking across a mountain ridge">
+        </figure>
+      </div>
+
+      <div class="summit-line reveal-el">
+        <div class="peak-node done"><div class="dot"></div><div class="name">Gerlachovský štít</div><div class="tag">highest in Slovakia</div></div>
+        <div class="peak-conn"></div>
+        <div class="peak-node done"><div class="dot"></div><div class="name">Traunstein</div><div class="tag">Austria</div></div>
+        <div class="peak-conn"></div>
+        <div class="peak-node goal"><div class="dot"></div><div class="name">Mont Blanc</div><div class="tag">the goal — 2027</div></div>
+      </div>
+
+      <div class="stat-row reveal-el">
+        <div class="stat-cell"><div class="stat-num">1:53</div><div class="stat-label">HALF MARATHON</div></div>
+        <div class="stat-cell"><div class="stat-num">55:00</div><div class="stat-label">10KM</div></div>
+        <div class="stat-cell"><div class="stat-num">5:10/km</div><div class="stat-label">6KM BEST PACE</div></div>
+      </div>
+
+      <div class="prep reveal-el">
+        <div>Running &amp; endurance base, considering an Ironman</div>
+        <div>Gym strength training</div>
+        <div>Ferratas &amp; mountain experience</div>
+        <div>Mountaineering technique</div>
+        <div>Equipment preparation</div>
+        <div>Documenting the whole build-up</div>
+      </div>
+
+      <p class="partners reveal-el">Reached out about equipment partnerships to <b>The North Face, Patagonia, La Sportiva, Exped</b> and <b>Blue Ice</b> — conversations, not confirmed deals.</p>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="pad" id="skills">
+    <div class="wrap">
+      <div class="head">
+        <span class="index">// 06</span>
+        <h2>What I work with</h2>
+      </div>
+      <div class="skill-cols">
+        <div class="skill-col reveal-el">
+          <h3>TECHNOLOGY</h3>
+          <span class="tag">Python</span><span class="tag">Cybersecurity</span><span class="tag">AI tools</span><span class="tag">VS Code</span><span class="tag">Copilot &amp; Codex</span>
+        </div>
+        <div class="skill-col reveal-el">
+          <h3>CREATIVE</h3>
+          <span class="tag">Video editing</span><span class="tag">Camera work</span><span class="tag">Content creation</span><span class="tag">Branding</span><span class="tag">Social algorithms</span>
+        </div>
+        <div class="skill-col reveal-el">
+          <h3>BUSINESS</h3>
+          <span class="tag">Marketing</span><span class="tag">Finance</span><span class="tag">Pitching</span><span class="tag">Leadership</span><span class="tag">Int'l collaboration</span>
+        </div>
+        <div class="skill-col reveal-el">
+          <h3>UNDER PRESSURE</h3>
+          <span class="tag">Teamwork</span><span class="tag">Communication</span><span class="tag">Adaptability</span><span class="tag">Stress tolerance</span><span class="tag">Discipline</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="hair">
+
+  <!-- EXPERIENCE -->
+  <section class="pad" id="experience" style="padding-top:80px; padding-bottom:80px;">
+    <div class="wrap" style="max-width:820px;">
+      <div class="head" style="margin-bottom:30px;">
+        <span class="index">// 07</span>
+        <h2 style="font-size:clamp(28px,4vw,40px);">Also on the résumé</h2>
+      </div>
+      <div class="exp-row reveal-el">
+        <div class="exp-role">WAREHOUSE</div>
+        <div><div class="exp-title">Alza</div><div class="exp-desc">Picking and packing orders on the conveyor system, working independently with heavier items.</div></div>
+      </div>
+      <div class="exp-row reveal-el">
+        <div class="exp-role">BARTENDING</div>
+        <div><div class="exp-title">Festival bar</div><div class="exp-desc">Mixing drinks and tapping beer through high-volume shifts — fast, customer-facing, team-run.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="wrap">
+      <span class="index reveal-el" style="display:block; margin-bottom:18px;">// 08</span>
+      <h2 class="reveal-el">Let's build<br>something interesting.</h2>
+      <div class="contact-links reveal-el">
+        <a href="mailto:danysto08@gmail.com">danysto08@gmail.com</a>
+        <a href="https://www.instagram.com/daniel._kooo" target="_blank" rel="noopener">@daniel._kooo</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>Daniel Štorcel — 2026</span>
+  <span>Bratislava, Slovakia</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Header background on scroll
+  var header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', function(){
+    if(window.scrollY > 40){ header.classList.add('scrolled'); } else { header.classList.remove('scrolled'); }
+  }, { passive:true });
+
+  // Mobile menu
+  var burger = document.getElementById('burgerBtn');
+  var menu = document.getElementById('mobileMenu');
+  burger.addEventListener('click', function(){
+    var open = menu.classList.toggle('open');
+    burger.classList.toggle('open', open);
+    burger.setAttribute('aria-expanded', open ? 'true':'false');
+  });
+  menu.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){ menu.classList.remove('open'); burger.classList.remove('open'); });
+  });
+
+  // Topographic hero SVG — generate contour-like paths
+  var svg = document.getElementById('topoSvg');
+  var NS = 'http://www.w3.org/2000/svg';
+  function contourPath(baseY, amp, seed){
+    var pts = [];
+    var w = 1200;
+    for(var x = -50; x <= w+50; x += 60){
+      var y = baseY + Math.sin((x/160) + seed) * amp + Math.sin((x/47) + seed*2) * (amp*0.35);
+      pts.push([x,y]);
+    }
+    var d = 'M ' + pts[0][0] + ' ' + pts[0][1];
+    for(var i=1;i<pts.length;i++){
+      var midX = (pts[i-1][0] + pts[i][0]) / 2;
+      var midY = (pts[i-1][1] + pts[i][1]) / 2;
+      d += ' Q ' + pts[i-1][0] + ' ' + pts[i-1][1] + ' ' + midX + ' ' + midY;
+    }
+    return d;
+  }
+  var lines = 9;
+  var createdPaths = [];
+  for(var i=0;i<lines;i++){
+    var p = document.createElementNS(NS,'path');
+    var baseY = 140 + i * 78;
+    var amp = 30 + i * 6;
+    p.setAttribute('d', contourPath(baseY, amp, i*0.7));
+    if(i === 3 || i === 6){ p.classList.add('accent'); }
+    svg.appendChild(p);
+    createdPaths.push(p);
+  }
+
+  if(!reduced && window.gsap){
+    createdPaths.forEach(function(p, idx){
+      var len = p.getTotalLength();
+      p.style.strokeDasharray = len;
+      p.style.strokeDashoffset = len;
+      gsap.to(p, { strokeDashoffset:0, duration:1.8, delay: idx*0.08, ease:'power2.out' });
+    });
+    gsap.registerPlugin(ScrollTrigger);
+    document.querySelectorAll('.reveal-el').forEach(function(el){
+      gsap.fromTo(el, { opacity:0, y:24 }, {
+        opacity:1, y:0, duration:0.8, ease:'power2.out',
+        scrollTrigger:{ trigger: el, start:'top 88%' }
+      });
+    });
+    document.querySelectorAll('.ach-card').forEach(function(el, idx){
+      gsap.fromTo(el, { opacity:0 }, { opacity:1, duration:0.6, delay: idx*0.05,
+        scrollTrigger:{ trigger: el, start:'top 90%' },
+        onStart:function(){ el.classList.add('reveal'); }
+      });
+    });
+
+    // Mountain gallery — stacked from the right, then brought forward on scroll
+    var gallery = document.querySelector('.summit-gallery');
+    if(gallery){
+      var mountainPhotos = Array.prototype.slice.call(gallery.querySelectorAll('.summit-photo'));
+      var mountainDescriptions = Array.prototype.slice.call(gallery.querySelectorAll('.summit-description'));
+      if(mountainPhotos.length === 3 && mountainDescriptions.length === 3){
+        gallery.classList.add('scroll-ready');
+        gsap.set(mountainPhotos[0], { autoAlpha:1, x:0, y:0, scale:1, zIndex:3 });
+        gsap.set(mountainPhotos[1], { autoAlpha:0.42, x:76, y:28, scale:0.93, zIndex:2 });
+        gsap.set(mountainPhotos[2], { autoAlpha:0.22, x:152, y:56, scale:0.86, zIndex:1 });
+        gsap.set(mountainDescriptions[0], { autoAlpha:1, x:0, y:0 });
+        gsap.set(mountainDescriptions[1], { autoAlpha:0, x:42, y:0 });
+        gsap.set(mountainDescriptions[2], { autoAlpha:0, x:42, y:0 });
+        gsap.timeline({
+          scrollTrigger:{
+            trigger:gallery, start:'top 110px', end:'+=250%', pin:true, scrub:0.7,
+            anticipatePin:1, invalidateOnRefresh:true
+          }
+        })
+        .to(mountainPhotos[0], { x:0, duration:0.8 })
+        .to(mountainPhotos[0], { autoAlpha:0, x:-140, y:-18, scale:0.96, duration:0.55, ease:'power2.in' })
+        .to(mountainDescriptions[0], { autoAlpha:0, x:-42, duration:0.4, ease:'power2.in' }, '<')
+        .to(mountainPhotos[1], { autoAlpha:1, x:0, y:0, scale:1, zIndex:3, duration:0.7, ease:'power2.out' }, '<')
+        .to(mountainDescriptions[1], { autoAlpha:1, x:0, duration:0.55, ease:'power2.out' }, '<')
+        .to(mountainPhotos[1], { x:0, duration:0.8 })
+        .to(mountainPhotos[1], { autoAlpha:0, x:-140, y:-18, scale:0.96, duration:0.55, ease:'power2.in' })
+        .to(mountainDescriptions[1], { autoAlpha:0, x:-42, duration:0.4, ease:'power2.in' }, '<')
+        .to(mountainPhotos[2], { autoAlpha:1, x:0, y:0, scale:1, zIndex:3, duration:0.7, ease:'power2.out' }, '<')
+        .to(mountainDescriptions[2], { autoAlpha:1, x:0, duration:0.55, ease:'power2.out' }, '<')
+        .to(mountainPhotos[2], { x:0, duration:0.9 })
+        .to(mountainPhotos[2], { autoAlpha:0, y:150, scale:0.96, duration:0.7, ease:'power2.in' })
+        .to(mountainDescriptions[2], { autoAlpha:0, y:46, duration:0.5, ease:'power2.in' }, '<');
+      }
+    }
+  } else {
+    document.querySelectorAll('.reveal-el').forEach(function(el){ el.classList.add('in'); });
+    document.querySelectorAll('.ach-card').forEach(function(el){ el.classList.add('reveal'); });
+    createdPaths.forEach(function(p){ p.style.strokeDasharray = 'none'; });
+  }
+
+  // Fallback for reveal-el without gsap (in case CDN blocked)
+  if(!window.gsap){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){ if(entry.isIntersecting){ entry.target.classList.add('in'); } });
+    }, { threshold:0.15 });
+    document.querySelectorAll('.reveal-el').forEach(function(el){ io.observe(el); });
+    document.querySelectorAll('.ach-card').forEach(function(el){ el.classList.add('reveal'); });
+  }
+})();
+</script>
+
+</body>
+</html>
