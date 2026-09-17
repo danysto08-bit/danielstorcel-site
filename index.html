@@ -193,6 +193,7 @@
   }
   .traits span:hover{ border-color:var(--green); color:var(--text); }
   .about-sticky{ position:sticky; top:120px; align-self:start; }
+  @media (max-width:860px){ .about-sticky{ position:static; } }
   .about-sticky .kicker{ font-family:var(--mono); font-size:12px; color:var(--green); margin-bottom:16px; display:block; }
   .interest-list{ display:flex; flex-direction:column; gap:0; }
   .interest-list div{
@@ -288,7 +289,13 @@
     display:flex; flex-direction:column; align-items:center; gap:6px; font-family:var(--mono);
     font-size:9px; letter-spacing:0.13em; color:var(--green); white-space:nowrap;
     text-shadow:0 0 14px var(--green-glow);
+    opacity:1; transition:opacity .5s ease;
+    pointer-events:none;
   }
+  .summit-scroll-hint.fade{ opacity:0; }
+  .summit-scroll-hint .txt{ animation: summit-hint-pulse 1.8s ease-in-out infinite; }
+  @keyframes summit-hint-pulse{ 0%,100%{ opacity:0.6; } 50%{ opacity:1; } }
+  @media (prefers-reduced-motion: reduce){ .summit-scroll-hint .txt{ animation:none; } }
   .summit-scroll-hint .arrow{
     width:8px; height:8px; border-right:1.5px solid var(--green); border-bottom:1.5px solid var(--green);
     transform:rotate(45deg); animation:summit-scroll-hint 1.5s ease-in-out infinite;
@@ -610,6 +617,11 @@
         <figure class="summit-photo">
           <img src="mountain-view.jpg" alt="Daniel Štorcel looking across a mountain ridge">
         </figure>
+
+        <div class="summit-scroll-hint" id="summitScrollHint">
+          <span class="txt">SCROLL</span>
+          <span class="arrow"></span>
+        </div>
       </div>
 
       <div class="summit-line reveal-el">
@@ -794,10 +806,14 @@
         gsap.set(mountainDescriptions[0], { autoAlpha:1, x:0, y:0 });
         gsap.set(mountainDescriptions[1], { autoAlpha:0, x:42, y:0 });
         gsap.set(mountainDescriptions[2], { autoAlpha:0, x:42, y:0 });
+        var scrollHint = document.getElementById('summitScrollHint');
         gsap.timeline({
           scrollTrigger:{
             trigger:gallery, start:'top 110px', end:'+=250%', pin:true, scrub:0.7,
-            anticipatePin:1, invalidateOnRefresh:true
+            anticipatePin:1, invalidateOnRefresh:true,
+            onUpdate:function(self){
+              if(scrollHint){ scrollHint.classList.toggle('fade', self.progress > 0.03); }
+            }
           }
         })
         .to(mountainPhotos[0], { x:0, duration:0.8 })
