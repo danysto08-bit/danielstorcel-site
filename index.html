@@ -388,14 +388,16 @@
   }
   .summit-description .left{ right:calc(100% + 72px); text-align:right; }
   .summit-description .right{ left:calc(100% + 140px); }
+  /* "keep scrolling" cue under the pinned photo stack — only shown while the scroll animation is active */
   .summit-scroll-hint{
-    position:absolute; left:50%; bottom:18px; z-index:6; transform:translateX(-50%);
-    display:flex; flex-direction:column; align-items:center; gap:6px; font-family:var(--mono);
-    font-size:9px; letter-spacing:0.13em; color:var(--green); white-space:nowrap;
+    position:absolute; left:50%; top:calc(100% + 18px); z-index:6; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:8px; font-family:var(--mono);
+    font-size:11px; letter-spacing:0.16em; color:var(--green); white-space:nowrap; pointer-events:none;
     text-shadow:0 0 14px var(--green-glow);
   }
+  .summit-gallery:not(.scroll-ready) .summit-scroll-hint{ display:none; }
   .summit-scroll-hint .arrow{
-    width:8px; height:8px; border-right:1.5px solid var(--green); border-bottom:1.5px solid var(--green);
+    width:11px; height:11px; border-right:1.5px solid var(--green); border-bottom:1.5px solid var(--green);
     transform:rotate(45deg); animation:summit-scroll-hint 1.5s ease-in-out infinite;
   }
   @keyframes summit-scroll-hint{
@@ -774,6 +776,7 @@
         <figure class="summit-photo summit-photo--upright">
           <img src="mountain-view.jpg" alt="Daniel Štorcel looking across a mountain ridge" data-sk-alt="Daniel Štorcel s výhľadom na horský hrebeň">
         </figure>
+        <div class="summit-scroll-hint" aria-hidden="true"><span data-sk="SCROLLUJ ĎALEJ">KEEP SCROLLING</span><div class="arrow"></div></div>
       </div>
 
       <div class="summit-line reveal-el">
@@ -1006,6 +1009,7 @@
     if(gallery){
       var mountainPhotos = Array.prototype.slice.call(gallery.querySelectorAll('.summit-photo'));
       var mountainDescriptions = Array.prototype.slice.call(gallery.querySelectorAll('.summit-description'));
+      var scrollHint = gallery.querySelector('.summit-scroll-hint');
       if(mountainPhotos.length === 3 && mountainDescriptions.length === 3){
         gallery.classList.add('scroll-ready');
         gsap.set(mountainPhotos[0], { autoAlpha:1, x:0, y:0, scale:1, zIndex:3 });
@@ -1032,7 +1036,8 @@
         .to(mountainDescriptions[2], { autoAlpha:1, x:0, duration:0.55, ease:'power2.out' }, '<')
         .to(mountainPhotos[2], { x:0, duration:0.9 })
         .to(mountainPhotos[2], { autoAlpha:0, y:150, scale:0.96, duration:0.7, ease:'power2.in' })
-        .to(mountainDescriptions[2], { autoAlpha:0, y:46, duration:0.5, ease:'power2.in' }, '<');
+        .to(mountainDescriptions[2], { autoAlpha:0, y:46, duration:0.5, ease:'power2.in' }, '<')
+        .to(scrollHint, { autoAlpha:0, duration:0.3 }, '<');
       }
     }
   } else {
