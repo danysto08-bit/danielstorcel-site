@@ -202,8 +202,19 @@
   @media (max-width:700px){ section.pad{ padding:80px 0; } }
 
   /* ---------- About ---------- */
-  .about-grid{ display:grid; grid-template-columns: 0.8fr 1.2fr; gap:64px; }
-  @media (max-width:860px){ .about-grid{ grid-template-columns:1fr; gap:40px; } }
+  .about-grid{
+    display:grid; grid-template-columns: 0.8fr 1.2fr; grid-template-rows:auto 1fr;
+    column-gap:64px; row-gap:28px;
+  }
+  .about-sticky{ grid-column:1; grid-row:1; }
+  .about-photo{ grid-column:1; grid-row:2; align-self:start; }
+  .about-copy{ grid-column:2; grid-row:1 / span 2; }
+  @media (max-width:860px){
+    .about-grid{ grid-template-columns:1fr; grid-template-rows:none; gap:40px; }
+    .about-sticky, .about-copy, .about-photo{ grid-column:1; grid-row:auto; }
+    .about-copy{ order:2; }
+    .about-photo{ order:3; }
+  }
   .about-copy p{ font-size:18px; line-height:1.75; color:var(--text); max-width:620px; }
   .about-copy p + p{ margin-top:22px; color:var(--text-dim); font-size:16px; }
   .traits{ display:flex; flex-wrap:wrap; gap:9px; margin-top:36px; }
@@ -212,11 +223,17 @@
     padding:7px 13px; border-radius:3px; transition: border-color .25s ease, color .25s ease;
   }
   .traits span:hover{ border-color:var(--green); color:var(--text); }
-  .about-sticky{ position:sticky; top:120px; align-self:start; }
-  /* FIX: on tablet/phone the grid is one column, so a sticky block slid over the paragraphs below it.
-     Sticky only makes sense in the two-column desktop layout. */
-  @media (max-width:860px){
-    .about-sticky{ position:static; top:auto; }
+  /* About block stays in place — no sticky / scroll-following on any screen size */
+  .about-sticky{ position:static; align-self:start; }
+  .about-photo{
+    margin:0; border:1px solid var(--line); border-radius:2px; overflow:hidden; background:var(--bg-alt);
+  }
+  .about-photo img{
+    width:100%; height:auto; aspect-ratio:16/9; object-fit:cover; object-position:50% 50%;
+    filter:saturate(0.92) contrast(1.04);
+  }
+  @media (max-width:600px){
+    .about-photo img{ aspect-ratio:3/2; object-position:52% 50%; }
   }
   .about-sticky .kicker{ font-family:var(--mono); font-size:12px; color:var(--green); margin-bottom:16px; display:block; }
   .interest-list{ display:flex; flex-direction:column; gap:0; }
@@ -548,6 +565,9 @@
           <span data-sk="Súťaživý">Competitive</span><span data-sk="Sebamotivovaný">Self-motivated</span><span data-sk="Podnikavý">Entrepreneurial</span><span data-sk="Zvláda tlak">Works well under pressure</span>
         </div>
       </div>
+      <figure class="about-photo reveal-el">
+        <img src="about-harbor.jpg" alt="Daniel Štorcel in front of moored sailboats in a marina at night" data-sk-alt="Daniel Štorcel pred zakotvenými plachetnicami v marine v noci" width="1536" height="864" loading="lazy" decoding="async">
+      </figure>
     </div>
   </section>
 
@@ -585,7 +605,7 @@
           <div class="ach-more"><div class="ach-more-inner"><ul>
             <li data-sk="Slovenský ročník 2025/26: približne <b>2 140 študentov</b> zo <b>179 škôl</b> v <b>807 tímoch</b>.">Slovak 2025/26 edition: about <b>2,140 students</b> from <b>179 schools</b> in <b>807 teams</b>.</li>
             <li data-sk="V celej Európe: <b>28 832 študentov</b> z <b>22 krajín</b> v <b>9 096 tímoch</b>.">Europe-wide: <b>28,832 students</b> from <b>22 countries</b> in <b>9,096 teams</b>.</li>
-            <li data-sk="Národná fáza pozostávala z <b>troch štatistických testov a prezentácie dát</b>; postupovali najlepšie tímy.">The national phase was <b>three statistics tests and a presentation of data</b>; the best teams advanced.</li>
+            <li data-sk="Národná fáza pozostávala z <b>troch štatistických testov a prezentácie dát</b>; postupovali najlepšie tímy.">The national phase was <b>three statistics tests and a data presentation</b>; the best teams advanced.</li>
             <li data-sk="Európske kolo: <b>2-minútové video v angličtine</b>, ktoré z oficiálnych štatistických údajov vytvára „štatistický portrét“ krajiny.">The European round: a <b>2-minute video in English</b> that builds a "statistical portrait" of a country from official statistical data.</li>
             <li data-sk="Slovensko malo v európskom finále <b>štyri tímy</b> a <b>tri slovenské videá</b> sa dostali do európskej Top 5.">Slovakia had <b>four teams</b> in the European final, and <b>three Slovak videos</b> made the European Top 5.</li>
           </ul>
