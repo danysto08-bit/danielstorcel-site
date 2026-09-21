@@ -313,7 +313,49 @@
     border:1px solid var(--line); padding:32px; display:flex; flex-direction:column; height:100%;
     transition:border-color .3s ease, background .3s ease;
   }
-  .proj-card:hover{ border-color:var(--line-strong); background:var(--bg-alt); }
+  /* Each card glows in its own colour: 1 red, 2 green, 3 blue, 4 purple.
+     Higher specificity so the transition isn't overridden by the later .reveal-el rule. */
+  .proj-grid .proj-card{
+    --c:#b8ff3d; --c-rgb:184,255,61;
+    position:relative; isolation:isolate;
+    transition:border-color .3s ease, background .3s ease, box-shadow .35s ease, translate .35s cubic-bezier(.2,.7,.2,1),
+               opacity .7s ease, transform .7s ease;
+  }
+  .proj-grid .proj-card:nth-child(1){ --c:#ff3b4e; --c-rgb:255,59,78; }
+  .proj-grid .proj-card:nth-child(2){ --c:#b8ff3d; --c-rgb:184,255,61; }
+  .proj-grid .proj-card:nth-child(3){ --c:#2f9bff; --c-rgb:47,155,255; }
+  .proj-grid .proj-card:nth-child(4){ --c:#b44dff; --c-rgb:180,77,255; }
+
+  /* soft spotlight that follows the mouse inside the card (position set from JS) */
+  .proj-grid .proj-card::before{
+    content:''; position:absolute; inset:0; z-index:-1; pointer-events:none; opacity:0;
+    background:radial-gradient(420px circle at var(--mx, 50%) var(--my, 30%), rgba(var(--c-rgb), .18), transparent 65%);
+    transition:opacity .35s ease;
+  }
+  .proj-grid .proj-card .proj-name,
+  .proj-grid .proj-card .status,
+  .proj-grid .proj-card .proj-skills span{ transition:color .3s ease, border-color .3s ease, background .3s ease; }
+
+  @media (hover:hover){
+    .proj-grid .proj-card:hover{
+      border-color:var(--c); background:var(--bg-alt);
+      /* `translate` (not `transform`) so it doesn't clash with the scroll-reveal animation */
+      translate:0 -8px;
+      box-shadow:0 0 0 1px var(--c), 0 0 26px rgba(var(--c-rgb), .35), 0 0 64px rgba(var(--c-rgb), .16), inset 0 0 26px rgba(var(--c-rgb), .06);
+    }
+    .proj-grid .proj-card:hover::before{ opacity:1; }
+    .proj-grid .proj-card:hover .proj-name{ color:var(--c); }
+    .proj-grid .proj-card:hover .status{ color:var(--c); border-color:rgba(var(--c-rgb), .55); background:rgba(var(--c-rgb), .10); }
+    .proj-grid .proj-card:hover .proj-skills span{ border-color:rgba(var(--c-rgb), .38); color:var(--text); }
+  }
+  .proj-grid .proj-card:focus-within{
+    border-color:var(--c); background:var(--bg-alt);
+    box-shadow:0 0 0 1px var(--c), 0 0 26px rgba(var(--c-rgb), .35);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .proj-grid .proj-card{ transition:border-color .3s ease, background .3s ease, box-shadow .3s ease; }
+    .proj-grid .proj-card:hover{ translate:none; }
+  }
   .proj-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
   .proj-name{ font-family:var(--serif-display); font-size:32px; letter-spacing:0.01em; }
   .status{
@@ -1056,6 +1098,15 @@
         if(e.propertyName === 'grid-template-rows' && window.ScrollTrigger){ ScrollTrigger.refresh(); }
       });
     }
+  });
+
+  // Project cards: spotlight follows the mouse (CSS reads --mx / --my)
+  document.querySelectorAll('.proj-card').forEach(function(card){
+    card.addEventListener('pointermove', function(e){
+      var r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
   });
 
   // Fallback for reveal-el without gsap (in case CDN blocked)
