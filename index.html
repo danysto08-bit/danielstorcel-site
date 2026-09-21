@@ -62,8 +62,28 @@
     border-bottom: 1px solid transparent;
   }
   header.scrolled{ background:rgba(10,10,11,0.82); border-bottom-color:var(--line); }
+
+  /* Logo + language switch stacked in the top-left corner */
+  .brand{ display:flex; flex-direction:column; align-items:flex-start; gap:4px; }
   .logo{ font-family:var(--mono); font-size:14px; letter-spacing:0.04em; color:var(--text); text-decoration:none; }
   .logo span{ color:var(--green); }
+  .lang{
+    display:flex; align-items:center; gap:2px;
+    font-family:var(--mono); font-size:11px; letter-spacing:0.06em; color:var(--text-faint);
+  }
+  .lang button{
+    background:none; border:none; font:inherit; letter-spacing:inherit; color:var(--text-dim); cursor:pointer;
+    padding:5px 6px; min-height:28px; position:relative; transition:color .25s ease;
+  }
+  .lang button:first-child{ padding-left:0; }
+  .lang button:hover{ color:var(--text); }
+  .lang button.active{ color:var(--green); }
+  .lang button.active::after{
+    content:''; position:absolute; left:6px; right:6px; bottom:3px; height:1px; background:var(--green);
+  }
+  .lang button:first-child.active::after{ left:0; }
+  .lang button:focus-visible{ outline:1px solid var(--green); outline-offset:2px; }
+
   nav.desktop{ display:flex; gap:32px; list-style:none; }
   nav.desktop a{
     font-family:var(--mono); font-size:12.5px; text-decoration:none; color:var(--text-dim);
@@ -193,11 +213,16 @@
   }
   .traits span:hover{ border-color:var(--green); color:var(--text); }
   .about-sticky{ position:sticky; top:120px; align-self:start; }
+  /* FIX: on tablet/phone the grid is one column, so a sticky block slid over the paragraphs below it.
+     Sticky only makes sense in the two-column desktop layout. */
+  @media (max-width:860px){
+    .about-sticky{ position:static; top:auto; }
+  }
   .about-sticky .kicker{ font-family:var(--mono); font-size:12px; color:var(--green); margin-bottom:16px; display:block; }
   .interest-list{ display:flex; flex-direction:column; gap:0; }
   .interest-list div{
     padding:14px 0; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:13px; color:var(--text-dim);
-    display:flex; justify-content:space-between;
+    display:flex; justify-content:space-between; gap:16px;
   }
   .interest-list div span:last-child{ color:var(--text-faint); }
 
@@ -426,48 +451,61 @@
 </head>
 <body>
 
+<!--
+  LANGUAGE SWITCH: every element with a data-sk="..." attribute has its English text in the tag itself
+  and its Slovak text in data-sk. Images use data-sk-alt for the Slovak alt text.
+  To change a Slovak translation, just edit the data-sk value.
+-->
+
 <div class="grain"></div>
 
 <header id="siteHeader">
-  <a href="#top" class="logo">D<span>.</span>Š<span>.</span></a>
+  <div class="brand">
+    <a href="#top" class="logo">D<span>.</span>Š<span>.</span></a>
+    <div class="lang" role="group" aria-label="Language / Jazyk">
+      <button type="button" data-lang="en" class="active" aria-pressed="true">EN</button>
+      <span aria-hidden="true">/</span>
+      <button type="button" data-lang="sk" aria-pressed="false">SK</button>
+    </div>
+  </div>
   <nav class="desktop">
-    <a href="#about">About</a>
-    <a href="#achievements">Record</a>
-    <a href="#work">Work</a>
-    <a href="#research">Research</a>
-    <a href="#summit">Summit</a>
-    <a href="#contact">Contact</a>
+    <a href="#about" data-sk="O mne">About</a>
+    <a href="#achievements" data-sk="Úspechy">Record</a>
+    <a href="#work" data-sk="Projekty">Work</a>
+    <a href="#research" data-sk="Výskum">Research</a>
+    <a href="#summit" data-sk="Vrchol">Summit</a>
+    <a href="#contact" data-sk="Kontakt">Contact</a>
   </nav>
   <button class="burger" id="burgerBtn" aria-label="Open menu" aria-expanded="false"><span></span></button>
 </header>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#about"><span class="idx">01</span>About</a>
-  <a href="#achievements"><span class="idx">02</span>Record</a>
-  <a href="#work"><span class="idx">03</span>Work</a>
-  <a href="#research"><span class="idx">04</span>Research</a>
-  <a href="#summit"><span class="idx">05</span>Summit</a>
-  <a href="#contact"><span class="idx">06</span>Contact</a>
+  <a href="#about"><span class="idx">01</span><span data-sk="O mne">About</span></a>
+  <a href="#achievements"><span class="idx">02</span><span data-sk="Úspechy">Record</span></a>
+  <a href="#work"><span class="idx">03</span><span data-sk="Projekty">Work</span></a>
+  <a href="#research"><span class="idx">04</span><span data-sk="Výskum">Research</span></a>
+  <a href="#summit"><span class="idx">05</span><span data-sk="Vrchol">Summit</span></a>
+  <a href="#contact"><span class="idx">06</span><span data-sk="Kontakt">Contact</span></a>
 </div>
 
 <main id="top">
 
   <!-- HERO -->
   <section class="hero">
-    <img class="hero-photo" src="hero-daniel.jpg" alt="Daniel Štorcel by a canal at night">
+    <img class="hero-photo" src="hero-daniel.jpg" alt="Daniel Štorcel by a canal at night" data-sk-alt="Daniel Štorcel pri kanáli v noci">
     <svg class="topo" id="topoSvg" viewBox="0 0 1200 800" preserveAspectRatio="none" aria-hidden="true"></svg>
     <div class="hero-content">
-      <div class="hero-eyebrow"><span class="dot"></span>Bratislava, Slovakia — final year</div>
+      <div class="hero-eyebrow"><span class="dot"></span><span data-sk="Bratislava, Slovensko — maturitný ročník">Bratislava, Slovakia — final year</span></div>
       <h1 class="name">DANIEL<br><span class="last">ŠTORCEL</span></h1>
-      <p class="hero-sub">
+      <p class="hero-sub" data-sk="Dva roky v <b>Top 5</b> na Slovensku v kritickom myslení. Výskumný projekt na <b>Slovenskej akadémii vied</b>. Startup s drakom. Hora, ktorá ešte nie je zdolaná.">
         Two years in Slovakia's <b>Top 5</b> for critical thinking. A research project at the <b>Slovak Academy of Sciences</b>.
         A startup with a dragon on it. A mountain that isn't climbed yet.
       </p>
       <div class="hero-tags">
-        <span>Technology</span><span>AI</span><span>Entrepreneurship</span><span>Research</span><span>Mountains</span>
+        <span data-sk="Technológie">Technology</span><span>AI</span><span data-sk="Podnikanie">Entrepreneurship</span><span data-sk="Výskum">Research</span><span data-sk="Hory">Mountains</span>
       </div>
     </div>
-    <div class="scroll-cue"><div class="track"></div>SCROLL</div>
+    <div class="scroll-cue"><div class="track"></div><span data-sk="SCROLLUJ">SCROLL</span></div>
   </section>
 
   <hr class="hair">
@@ -476,28 +514,28 @@
   <section class="pad" id="about">
     <div class="wrap about-grid">
       <div class="about-sticky reveal-el">
-        <span class="kicker">// 01 — About</span>
+        <span class="kicker"><span data-sk="// 01 — O mne">// 01 — About</span></span>
         <div class="interest-list">
-          <div><span>Tech &amp; AI</span><span>curious</span></div>
-          <div><span>Marketing &amp; brand</span><span>hands-on</span></div>
-          <div><span>Science &amp; research</span><span>SAV</span></div>
-          <div><span>Mountains</span><span>ongoing</span></div>
+          <div><span data-sk="Technológie a AI">Tech &amp; AI</span><span data-sk="zvedavý">curious</span></div>
+          <div><span data-sk="Marketing a značka">Marketing &amp; brand</span><span data-sk="v praxi">hands-on</span></div>
+          <div><span data-sk="Veda a výskum">Science &amp; research</span><span>SAV</span></div>
+          <div><span data-sk="Hory">Mountains</span><span data-sk="neustále">ongoing</span></div>
         </div>
       </div>
       <div class="about-copy">
-        <p class="reveal-el">
+        <p class="reveal-el" data-sk="Rád prichádzam na veci, ktoré nie sú v osnovách. Niekedy je to Python skript alebo skúmanie kyberbezpečnosti, inokedy pitch deck, tréningový plán alebo chémia tenkej vrstvy pod mikroskopom. Nevnímam to ako oddelené oblasti — je to jednoducho to, čo ma ten mesiac zaujíma.">
           I like figuring things out that aren't on the curriculum. Some weeks that's a Python script or a cybersecurity
           rabbit hole; other weeks it's a pitch deck, a training plan, or the chemistry of a thin film under a microscope.
           I don't think of these as separate lanes — they're just what I'm curious about that month.
         </p>
-        <p class="reveal-el">
+        <p class="reveal-el" data-sk="Som súťaživý od prírody a pod tlakom pokojný — pracoval som na zmenách v sklade, barmanil na festivaloch, viedol marketingovú časť medzinárodného tímu a hodiny som sedel pri laboratórnom vybavení, kým som nedostal vzorku správne. Spája to rovnaký inštinkt: postaviť to, otestovať to, pozrieť sa, či to obstojí.">
           I'm competitive by nature and calm under pressure — I've worked warehouse shifts and bartended festivals,
           led a marketing track on an international team, and sat with lab equipment for hours getting a sample right.
           What connects it is the same instinct: build it, test it, see if it holds up.
         </p>
         <div class="traits reveal-el">
-          <span>Ambitious</span><span>Curious</span><span>Team-oriented</span><span>Resilient</span>
-          <span>Competitive</span><span>Self-motivated</span><span>Entrepreneurial</span><span>Works well under pressure</span>
+          <span data-sk="Ambiciózny">Ambitious</span><span data-sk="Zvedavý">Curious</span><span data-sk="Tímový hráč">Team-oriented</span><span data-sk="Odolný">Resilient</span>
+          <span data-sk="Súťaživý">Competitive</span><span data-sk="Sebamotivovaný">Self-motivated</span><span data-sk="Podnikavý">Entrepreneurial</span><span data-sk="Zvláda tlak">Works well under pressure</span>
         </div>
       </div>
     </div>
@@ -510,63 +548,63 @@
     <div class="wrap">
       <div class="head">
         <span class="index">// 02</span>
-        <h2>Track record</h2>
-        <p>Competitions I've shown up for, across reasoning, business, and innovation.</p>
+        <h2 data-sk="Moje úspechy">Track record</h2>
+        <p data-sk="Súťaže, do ktorých som sa zapojil — od logického myslenia cez biznis až po inovácie.">Competitions I've shown up for, across reasoning, business, and innovation.</p>
       </div>
       <div class="ach-grid">
         <div class="ach-card reveal-el" tabindex="0">
-          <span class="ach-hint" aria-hidden="true"><span>details</span><i>+</i></span>
+          <span class="ach-hint" aria-hidden="true"><span data-sk="detaily">details</span><i>+</i></span>
           <div class="ach-stat">Top 5</div>
-          <div class="ach-title">Slovak Critical Thinking Competition</div>
-          <div class="ach-desc">Placed in the national Top 5 two years in a row — reasoning and analysis under time pressure.</div>
+          <div class="ach-title" data-sk="Slovenská súťaž v kritickom myslení">Slovak Critical Thinking Competition</div>
+          <div class="ach-desc" data-sk="Dva roky po sebe v celoštátnej Top 5 — úsudok a analýza pod časovým tlakom.">Placed in the national Top 5 two years in a row — reasoning and analysis under time pressure.</div>
           <div class="ach-more"><div class="ach-more-inner"><ul>
-            <li>Nationwide competition focused on <b>critical thinking, argumentation, media literacy</b>, working with data and exposing manipulative claims.</li>
-            <li>In 2024/25, <b>11,117 students</b> entered the secondary-school round — only the <b>top 48</b> reached the national final.</li>
-            <li>Finished in the <b>national Top 5 in two consecutive years</b>.</li>
-            <li>Timed tests demanded fast analysis of arguments, statistics, sources and manipulation techniques.</li>
-            <li>The final adds argumentation and public speaking on top of the written tests.</li>
+            <li data-sk="Celoštátna súťaž zameraná na <b>kritické myslenie, argumentáciu, mediálnu gramotnosť</b>, prácu s dátami a odhaľovanie manipulatívnych tvrdení.">Nationwide competition focused on <b>critical thinking, argumentation, media literacy</b>, working with data and exposing manipulative claims.</li>
+            <li data-sk="V ročníku 2024/25 sa do stredoškolského kola zapojilo <b>11 117 študentov</b> — do celoštátneho finále postúpilo iba <b>48 najlepších</b>.">In 2024/25, <b>11,117 students</b> entered the secondary-school round — only the <b>top 48</b> reached the national final.</li>
+            <li data-sk="Skončil som v <b>celoštátnej Top 5 dva roky po sebe</b>.">Finished in the <b>national Top 5 in two consecutive years</b>.</li>
+            <li data-sk="Časovo limitované testy vyžadovali rýchlu analýzu argumentov, štatistík, zdrojov a manipulačných techník.">Timed tests demanded fast analysis of arguments, statistics, sources and manipulation techniques.</li>
+            <li data-sk="Finále popri písomných testoch pridáva aj argumentáciu a verejné vystupovanie.">The final adds argumentation and public speaking on top of the written tests.</li>
           </ul>
-            <figure class="ach-photo"><img src="ach-critical-thinking.jpg" alt="Speaker at the podium in a grand baroque hall during the critical thinking competition ceremony, audience in the foreground" width="900" height="1200" style="--pos:50% 42%" decoding="async"></figure>
+            <figure class="ach-photo"><img src="ach-critical-thinking.jpg" alt="Speaker at the podium in a grand baroque hall during the critical thinking competition ceremony, audience in the foreground" data-sk-alt="Rečník za pódiom vo veľkej barokovej sále počas vyhlásenia súťaže v kritickom myslení, v popredí publikum" width="900" height="1200" style="--pos:50% 42%" decoding="async"></figure>
           </div></div>
         </div>
         <div class="ach-card reveal-el" tabindex="0">
-          <span class="ach-hint" aria-hidden="true"><span>details</span><i>+</i></span>
-          <div class="ach-stat">1st</div>
-          <div class="ach-title">European Statistics Competition</div>
-          <div class="ach-desc">1st place in Slovakia, plus a result at European level.</div>
+          <span class="ach-hint" aria-hidden="true"><span data-sk="detaily">details</span><i>+</i></span>
+          <div class="ach-stat" data-sk="1.">1st</div>
+          <div class="ach-title" data-sk="Európska štatistická súťaž">European Statistics Competition</div>
+          <div class="ach-desc" data-sk="1. miesto na Slovensku a výsledok aj na európskej úrovni.">1st place in Slovakia, plus a result at European level.</div>
           <div class="ach-more"><div class="ach-more-inner"><ul>
-            <li>Slovak 2025/26 edition: about <b>2,140 students</b> from <b>179 schools</b> in <b>807 teams</b>.</li>
-            <li>Europe-wide: <b>28,832 students</b> from <b>22 countries</b> in <b>9,096 teams</b>.</li>
-            <li>The national phase was <b>three statistics tests</b>; the best teams advanced.</li>
-            <li>The European round: a <b>2-minute video in English</b> that builds a "statistical portrait" of a country from official statistical data.</li>
-            <li>Slovakia had <b>four teams</b> in the European final, and <b>three Slovak videos</b> made the European Top 5.</li>
+            <li data-sk="Slovenský ročník 2025/26: približne <b>2 140 študentov</b> zo <b>179 škôl</b> v <b>807 tímoch</b>.">Slovak 2025/26 edition: about <b>2,140 students</b> from <b>179 schools</b> in <b>807 teams</b>.</li>
+            <li data-sk="V celej Európe: <b>28 832 študentov</b> z <b>22 krajín</b> v <b>9 096 tímoch</b>.">Europe-wide: <b>28,832 students</b> from <b>22 countries</b> in <b>9,096 teams</b>.</li>
+            <li data-sk="Národná fáza pozostávala z <b>troch štatistických testov</b>; postupovali najlepšie tímy.">The national phase was <b>three statistics tests</b>; the best teams advanced.</li>
+            <li data-sk="Európske kolo: <b>2-minútové video v angličtine</b>, ktoré z oficiálnych štatistických údajov vytvára „štatistický portrét“ krajiny.">The European round: a <b>2-minute video in English</b> that builds a "statistical portrait" of a country from official statistical data.</li>
+            <li data-sk="Slovensko malo v európskom finále <b>štyri tímy</b> a <b>tri slovenské videá</b> sa dostali do európskej Top 5.">Slovakia had <b>four teams</b> in the European final, and <b>three Slovak videos</b> made the European Top 5.</li>
           </ul>
-            <figure class="ach-photo"><img src="ach-statistics.jpg" alt="Waving the Slovak flag in front of a glass building at the European Statistics Competition" width="900" height="1200" style="--pos:50% 38%" decoding="async"></figure>
+            <figure class="ach-photo"><img src="ach-statistics.jpg" alt="Waving the Slovak flag in front of a glass building at the European Statistics Competition" data-sk-alt="Mávanie slovenskou vlajkou pred sklenenou budovou na Európskej štatistickej súťaži" width="900" height="1200" style="--pos:50% 38%" decoding="async"></figure>
           </div></div>
         </div>
         <div class="ach-card reveal-el" tabindex="0">
-          <span class="ach-hint" aria-hidden="true"><span>details</span><i>+</i></span>
-          <div class="ach-stat">1st</div>
+          <span class="ach-hint" aria-hidden="true"><span data-sk="detaily">details</span><i>+</i></span>
+          <div class="ach-stat" data-sk="1.">1st</div>
           <div class="ach-title">JA Europe Foodathon</div>
-          <div class="ach-desc">Innovation Award, international round — marketing, finance and presentation for our team's concept.</div>
+          <div class="ach-desc" data-sk="Cena za inováciu, medzinárodné kolo — marketing, financie a prezentácia konceptu nášho tímu.">Innovation Award, international round — marketing, finance and presentation for our team's concept.</div>
           <div class="ach-more"><div class="ach-more-inner"><ul>
-            <li>Won the <b>International Innovation Award</b> at JA Europe Foodathon.</li>
-            <li>Developed a <b>student venture concept</b> in an international team, working with European and African students.</li>
-            <li>My role: <b>led marketing and financial planning</b>.</li>
-            <li>Produced promotional content and contributed to the <b>final pitch</b>.</li>
+            <li data-sk="Vyhrali sme <b>Medzinárodnú cenu za inováciu</b> na JA Europe Foodathon.">Won the <b>International Innovation Award</b> at JA Europe Foodathon.</li>
+            <li data-sk="V medzinárodnom tíme s európskymi a africkými študentmi sme vytvorili <b>koncept študentského podniku</b>.">Developed a <b>student venture concept</b> in an international team, working with European and African students.</li>
+            <li data-sk="Moja rola: <b>viedol som marketing a finančné plánovanie</b>.">My role: <b>led marketing and financial planning</b>.</li>
+            <li data-sk="Vytvoril som propagačný obsah a prispel som k <b>finálnej prezentácii</b>.">Produced promotional content and contributed to the <b>final pitch</b>.</li>
           </ul>
-            <figure class="ach-photo"><img src="ach-foodathon.jpg" alt="Team Carbon Trail (JA Slovakia) on stage holding the Foodathon 2024 winners certificate" width="900" height="1098" style="--pos:50% 100%;aspect-ratio:1/1" decoding="async"></figure>
+            <figure class="ach-photo"><img src="ach-foodathon.jpg" alt="Team Carbon Trail (JA Slovakia) on stage holding the Foodathon 2024 winners certificate" data-sk-alt="Tím Carbon Trail (JA Slovensko) na pódiu s certifikátom víťazov Foodathon 2024" width="900" height="1098" style="--pos:50% 100%;aspect-ratio:1/1" decoding="async"></figure>
           </div></div>
         </div>
         <div class="ach-card reveal-el" tabindex="0">
-          <span class="ach-hint" aria-hidden="true"><span>details</span><i>+</i></span>
-          <div class="ach-stat">3rd</div>
+          <span class="ach-hint" aria-hidden="true"><span data-sk="detaily">details</span><i>+</i></span>
+          <div class="ach-stat" data-sk="3.">3rd</div>
           <div class="ach-title">European Business Challenge</div>
-          <div class="ach-desc">3rd in the Slovak round, 3rd overall in the European final.</div>
+          <div class="ach-desc" data-sk="3. miesto v slovenskom kole, celkovo 3. miesto v európskom finále.">3rd in the Slovak round, 3rd overall in the European final.</div>
           <div class="ach-more"><div class="ach-more-inner"><ul>
-            <li><b>3rd place in the Slovak round</b> and <b>3rd overall in the European final</b>.</li>
-            <li>Developed and presented a complete <b>business concept</b> as a team.</li>
-            <li>My contribution: the <b>business model, marketing strategy, financial planning</b> and the final pitch.</li>
+            <li data-sk="<b>3. miesto v slovenskom kole</b> a <b>celkovo 3. miesto v európskom finále</b>."><b>3rd place in the Slovak round</b> and <b>3rd overall in the European final</b>.</li>
+            <li data-sk="Ako tím sme vytvorili a odprezentovali kompletný <b>podnikateľský koncept</b>.">Developed and presented a complete <b>business concept</b> as a team.</li>
+            <li data-sk="Môj prínos: <b>obchodný model, marketingová stratégia, finančné plánovanie</b> a finálna prezentácia.">My contribution: the <b>business model, marketing strategy, financial planning</b> and the final pitch.</li>
           </ul></div></div>
         </div>
       </div>
@@ -580,50 +618,50 @@
     <div class="wrap">
       <div class="head">
         <span class="index">// 03</span>
-        <h2>Things I've built</h2>
-        <p>Startup concepts, brand experiments, and ideas I keep coming back to.</p>
+        <h2 data-sk="Čo som vytvoril">Things I've built</h2>
+        <p data-sk="Startupové koncepty, experimenty so značkou a nápady, ku ktorým sa stále vraciam.">Startup concepts, brand experiments, and ideas I keep coming back to.</p>
       </div>
       <div class="proj-grid">
 
         <div class="proj-card reveal-el">
           <div class="proj-top">
             <div class="proj-name">CarbonTrail</div>
-            <span class="status">Award-winning</span>
+            <span class="status" data-sk="Ocenený">Award-winning</span>
           </div>
-          <p class="proj-desc">A student innovation concept built with a team in under a weekend for JA Europe Foodathon, refined with a mentor into a pitch-ready product.</p>
-          <p class="proj-contrib"><b>My part:</b> marketing, finance, the promo video, and communicating with our African counterparts on the team.</p>
-          <div class="proj-skills"><span>Marketing</span><span>Finance</span><span>Video</span><span>Pitching</span></div>
+          <p class="proj-desc" data-sk="Študentský inovačný koncept vytvorený s tímom za necelý víkend pre JA Europe Foodathon a s mentorom dopracovaný do podoby pripravenej na prezentáciu.">A student innovation concept built with a team in under a weekend for JA Europe Foodathon, refined with a mentor into a pitch-ready product.</p>
+          <p class="proj-contrib" data-sk="<b>Moja časť:</b> marketing, financie, promo video a komunikácia s našimi africkými kolegami v tíme."><b>My part:</b> marketing, finance, the promo video, and communicating with our African counterparts on the team.</p>
+          <div class="proj-skills"><span>Marketing</span><span data-sk="Financie">Finance</span><span>Video</span><span data-sk="Prezentovanie">Pitching</span></div>
         </div>
 
         <div class="proj-card reveal-el">
           <div class="proj-top">
             <div class="proj-name">Grynade</div>
-            <span class="status">Student project</span>
+            <span class="status" data-sk="Študentský projekt">Student project</span>
           </div>
-          <p class="proj-desc">A hardcore preworkout brand concept — neon green, black, a grenade and a dragon. "STAY LOCKED IN." Built to learn branding and social growth by doing it.</p>
-          <p class="proj-contrib"><b>My part:</b> identity, TikTok strategy, and a "Veiny Galaxy" campaign that pulled ~10k likes.</p>
-          <div class="proj-skills"><span>Branding</span><span>TikTok</span><span>Social growth</span></div>
+          <p class="proj-desc" data-sk="Koncept hardcore preworkout značky — neónová zelená, čierna, granát a drak. „STAY LOCKED IN.“ Vytvorené, aby som sa naučil branding a rast na sociálnych sieťach priamo praxou.">A hardcore preworkout brand concept — neon green, black, a grenade and a dragon. "STAY LOCKED IN." Built to learn branding and social growth by doing it.</p>
+          <p class="proj-contrib" data-sk="<b>Moja časť:</b> identita, TikTok stratégia a kampaň „Veiny Galaxy“, ktorá získala ~10 tisíc lajkov."><b>My part:</b> identity, TikTok strategy, and a "Veiny Galaxy" campaign that pulled ~10k likes.</p>
+          <div class="proj-skills"><span>Branding</span><span>TikTok</span><span data-sk="Rast na sociálnych sieťach">Social growth</span></div>
           <a class="proj-link" href="https://grynade.store" target="_blank" rel="noopener">grynade.store ↗</a>
         </div>
 
         <div class="proj-card reveal-el">
           <div class="proj-top">
             <div class="proj-name">TARO</div>
-            <span class="status">Concept</span>
+            <span class="status" data-sk="Koncept">Concept</span>
           </div>
-          <p class="proj-desc">A non-profit concept connecting Erasmus+, international students, and mountain expeditions — community and personal growth through adventure.</p>
-          <p class="proj-contrib"><b>My part:</b> the concept and a distinct visual identity for its site.</p>
-          <div class="proj-skills"><span>Concept design</span><span>Web identity</span><span>Community</span></div>
+          <p class="proj-desc" data-sk="Neziskový koncept prepájajúci Erasmus+, medzinárodných študentov a horské expedície — komunita a osobný rast prostredníctvom dobrodružstva.">A non-profit concept connecting Erasmus+, international students, and mountain expeditions — community and personal growth through adventure.</p>
+          <p class="proj-contrib" data-sk="<b>Moja časť:</b> koncept a osobitá vizuálna identita jeho webu."><b>My part:</b> the concept and a distinct visual identity for its site.</p>
+          <div class="proj-skills"><span data-sk="Návrh konceptu">Concept design</span><span data-sk="Webová identita">Web identity</span><span data-sk="Komunita">Community</span></div>
         </div>
 
         <div class="proj-card reveal-el">
           <div class="proj-top">
             <div class="proj-name">AI × Mountains</div>
-            <span class="status">Idea</span>
+            <span class="status" data-sk="Nápad">Idea</span>
           </div>
-          <p class="proj-desc">A platform idea for hikers and mountaineers — surfacing suitable routes, outdoor experiences, and discounted gear across stores using AI.</p>
-          <p class="proj-contrib"><b>My part:</b> the original idea, unbuilt so far.</p>
-          <div class="proj-skills"><span>AI</span><span>Outdoor</span><span>Product thinking</span></div>
+          <p class="proj-desc" data-sk="Nápad na platformu pre turistov a horolezcov — pomocou AI vyhľadáva vhodné trasy, outdoorové zážitky a zľavnené vybavenie naprieč obchodmi.">A platform idea for hikers and mountaineers — surfacing suitable routes, outdoor experiences, and discounted gear across stores using AI.</p>
+          <p class="proj-contrib" data-sk="<b>Moja časť:</b> pôvodný nápad, zatiaľ nerealizovaný."><b>My part:</b> the original idea, unbuilt so far.</p>
+          <div class="proj-skills"><span>AI</span><span>Outdoor</span><span data-sk="Produktové myslenie">Product thinking</span></div>
         </div>
 
       </div>
@@ -636,14 +674,14 @@
       <div>
         <div class="head" style="margin-bottom:24px;">
           <span class="index">// 04</span>
-          <h2>Research at SAV</h2>
+          <h2 data-sk="Výskum na SAV">Research at SAV</h2>
         </div>
-        <p class="research-topic reveal-el">
+        <p class="research-topic reveal-el" data-sk="„Vplyv depozície atómových vrstiev oxidu zinočnatého na štruktúru uhlíkovo-kremíkovej elektródy“ — projekt realizovaný na Slovenskej akadémii vied.">
           "Influence of deposition of atomic layers of zinc oxide on the structure of a carbon-silicon electrode"
           — a project carried out at the Slovak Academy of Sciences.
         </p>
         <div class="research-meta reveal-el">
-          <span>ALD · ZnO</span><span>FIB cross-sections</span><span>EDX analysis</span><span>10 vs 20 cycles</span>
+          <span>ALD · ZnO</span><span data-sk="FIB prierezy">FIB cross-sections</span><span data-sk="EDX analýza">EDX analysis</span><span data-sk="10 vs 20 cyklov">10 vs 20 cycles</span>
         </div>
         <div class="fib-table reveal-el">
           <div class="row"><span>30 × 20 × 20 µm</span><span>50 nA</span></div>
@@ -656,19 +694,19 @@
       <div class="process reveal-el">
         <div class="process-step">
           <div class="n">01</div>
-          <div><div class="t">Question</div><div class="d">Does an ALD-deposited ZnO layer change the structure of a silicon-graphite electrode, and how?</div></div>
+          <div><div class="t" data-sk="Otázka">Question</div><div class="d" data-sk="Mení vrstva ZnO nanesená technikou ALD štruktúru kremíkovo-grafitovej elektródy, a ako?">Does an ALD-deposited ZnO layer change the structure of a silicon-graphite electrode, and how?</div></div>
         </div>
         <div class="process-step">
           <div class="n">02</div>
-          <div><div class="t">Experiment</div><div class="d">Prepared FIB cross-sections at varying beam currents and cut sizes, comparing samples after 10 and 20 ALD cycles.</div></div>
+          <div><div class="t" data-sk="Experiment">Experiment</div><div class="d" data-sk="Pripravil som FIB prierezy pri rôznych prúdoch lúča a veľkostiach rezov a porovnával vzorky po 10 a 20 ALD cykloch.">Prepared FIB cross-sections at varying beam currents and cut sizes, comparing samples after 10 and 20 ALD cycles.</div></div>
         </div>
         <div class="process-step">
           <div class="n">03</div>
-          <div><div class="t">Analysis</div><div class="d">Examined the cross-sections with EDX to read composition and layer structure.</div></div>
+          <div><div class="t" data-sk="Analýza">Analysis</div><div class="d" data-sk="Prierezy som skúmal pomocou EDX, aby som zistil zloženie a štruktúru vrstiev.">Examined the cross-sections with EDX to read composition and layer structure.</div></div>
         </div>
         <div class="process-step">
           <div class="n">04</div>
-          <div><div class="t">Presented as</div><div class="d">A SOČ (student scientific research) project, written up at a research-institute level.</div></div>
+          <div><div class="t" data-sk="Spracované ako">Presented as</div><div class="d" data-sk="Projekt SOČ (stredoškolská odborná činnosť), spracovaný na úrovni výskumného ústavu.">A SOČ (student scientific research) project, written up at a research-institute level.</div></div>
         </div>
       </div>
     </div>
@@ -680,7 +718,7 @@
       <div style="text-align:center;">
         <span class="index" style="display:block; margin-bottom:10px;">// 05</span>
         <div class="summit-peak reveal-el">MONT BLANC</div>
-        <p class="summit-sub reveal-el">Some things get measured in grades. This one gets measured in altitude — and it isn't climbed yet. The goal is next summer.</p>
+        <p class="summit-sub reveal-el" data-sk="Niektoré veci sa merajú známkami. Táto sa meria nadmorskou výškou — a ešte nie je zdolaná. Cieľ je budúce leto.">Some things get measured in grades. This one gets measured in altitude — and it isn't climbed yet. The goal is next summer.</p>
       </div>
 
       <div class="summit-gallery">
@@ -690,40 +728,40 @@
           <div class="summit-description"><span class="left">Velická</span><span class="right">próba</span></div>
         </div>
         <figure class="summit-photo">
-          <img src="mountain-summit.jpg" alt="Daniel Štorcel on a rocky mountain summit">
+          <img src="mountain-summit.jpg" alt="Daniel Štorcel on a rocky mountain summit" data-sk-alt="Daniel Štorcel na skalnatom horskom vrchole">
         </figure>
         <figure class="summit-photo summit-photo--upright">
-          <img src="mountain-lake.jpg" alt="Daniel Štorcel above a mountain lake">
+          <img src="mountain-lake.jpg" alt="Daniel Štorcel above a mountain lake" data-sk-alt="Daniel Štorcel nad horským plesom">
         </figure>
         <figure class="summit-photo">
-          <img src="mountain-view.jpg" alt="Daniel Štorcel looking across a mountain ridge">
+          <img src="mountain-view.jpg" alt="Daniel Štorcel looking across a mountain ridge" data-sk-alt="Daniel Štorcel s výhľadom na horský hrebeň">
         </figure>
       </div>
 
       <div class="summit-line reveal-el">
-        <div class="peak-node done"><div class="dot"></div><div class="name">Gerlachovský štít</div><div class="tag">highest in Slovakia</div></div>
+        <div class="peak-node done"><div class="dot"></div><div class="name">Gerlachovský štít</div><div class="tag" data-sk="najvyšší na Slovensku">highest in Slovakia</div></div>
         <div class="peak-conn"></div>
-        <div class="peak-node done"><div class="dot"></div><div class="name">Traunstein</div><div class="tag">Austria</div></div>
+        <div class="peak-node done"><div class="dot"></div><div class="name">Traunstein</div><div class="tag" data-sk="Rakúsko">Austria</div></div>
         <div class="peak-conn"></div>
-        <div class="peak-node goal"><div class="dot"></div><div class="name">Mont Blanc</div><div class="tag">the goal — 2027</div></div>
+        <div class="peak-node goal"><div class="dot"></div><div class="name">Mont Blanc</div><div class="tag" data-sk="cieľ — 2027">the goal — 2027</div></div>
       </div>
 
       <div class="stat-row reveal-el">
-        <div class="stat-cell"><div class="stat-num">1:53</div><div class="stat-label">HALF MARATHON</div></div>
-        <div class="stat-cell"><div class="stat-num">55:00</div><div class="stat-label">10KM</div></div>
-        <div class="stat-cell"><div class="stat-num">5:10/km</div><div class="stat-label">6KM BEST PACE</div></div>
+        <div class="stat-cell"><div class="stat-num">1:53</div><div class="stat-label" data-sk="POLMARATÓN">HALF MARATHON</div></div>
+        <div class="stat-cell"><div class="stat-num">55:00</div><div class="stat-label" data-sk="10 KM">10KM</div></div>
+        <div class="stat-cell"><div class="stat-num">5:10/km</div><div class="stat-label" data-sk="NAJLEPŠIE TEMPO NA 6 KM">6KM BEST PACE</div></div>
       </div>
 
       <div class="prep reveal-el">
-        <div>Running &amp; endurance base, considering an Ironman</div>
-        <div>Gym strength training</div>
-        <div>Ferratas &amp; mountain experience</div>
-        <div>Mountaineering technique</div>
-        <div>Equipment preparation</div>
-        <div>Documenting the whole build-up</div>
+        <div data-sk="Bežecký a vytrvalostný základ, zvažujem Ironman">Running &amp; endurance base, considering an Ironman</div>
+        <div data-sk="Silový tréning v posilňovni">Gym strength training</div>
+        <div data-sk="Ferraty a horské skúsenosti">Ferratas &amp; mountain experience</div>
+        <div data-sk="Horolezecká technika">Mountaineering technique</div>
+        <div data-sk="Príprava vybavenia">Equipment preparation</div>
+        <div data-sk="Dokumentovanie celej prípravy">Documenting the whole build-up</div>
       </div>
 
-      <p class="partners reveal-el">Reached out about equipment partnerships to <b>The North Face, Patagonia, La Sportiva, Exped</b> and <b>Blue Ice</b> — conversations, not confirmed deals.</p>
+      <p class="partners reveal-el" data-sk="Oslovil som ohľadom partnerstiev na vybavenie <b>The North Face, Patagonia, La Sportiva, Exped</b> a <b>Blue Ice</b> — rozhovory, nie potvrdené dohody.">Reached out about equipment partnerships to <b>The North Face, Patagonia, La Sportiva, Exped</b> and <b>Blue Ice</b> — conversations, not confirmed deals.</p>
     </div>
   </section>
 
@@ -732,24 +770,24 @@
     <div class="wrap">
       <div class="head">
         <span class="index">// 06</span>
-        <h2>What I work with</h2>
+        <h2 data-sk="S čím pracujem">What I work with</h2>
       </div>
       <div class="skill-cols">
         <div class="skill-col reveal-el">
-          <h3>TECHNOLOGY</h3>
-          <span class="tag">Python</span><span class="tag">Cybersecurity</span><span class="tag">AI tools</span><span class="tag">VS Code</span><span class="tag">Copilot &amp; Codex</span>
+          <h3 data-sk="TECHNOLÓGIE">TECHNOLOGY</h3>
+          <span class="tag">Python</span><span class="tag" data-sk="Kyberbezpečnosť">Cybersecurity</span><span class="tag" data-sk="AI nástroje">AI tools</span><span class="tag">VS Code</span><span class="tag">Copilot &amp; Codex</span>
         </div>
         <div class="skill-col reveal-el">
-          <h3>CREATIVE</h3>
-          <span class="tag">Video editing</span><span class="tag">Camera work</span><span class="tag">Content creation</span><span class="tag">Branding</span><span class="tag">Social algorithms</span>
+          <h3 data-sk="KREATIVITA">CREATIVE</h3>
+          <span class="tag" data-sk="Strih videa">Video editing</span><span class="tag" data-sk="Práca s kamerou">Camera work</span><span class="tag" data-sk="Tvorba obsahu">Content creation</span><span class="tag">Branding</span><span class="tag" data-sk="Algoritmy sociálnych sietí">Social algorithms</span>
         </div>
         <div class="skill-col reveal-el">
-          <h3>BUSINESS</h3>
-          <span class="tag">Marketing</span><span class="tag">Finance</span><span class="tag">Pitching</span><span class="tag">Leadership</span><span class="tag">Int'l collaboration</span>
+          <h3 data-sk="BIZNIS">BUSINESS</h3>
+          <span class="tag">Marketing</span><span class="tag" data-sk="Financie">Finance</span><span class="tag" data-sk="Prezentovanie">Pitching</span><span class="tag" data-sk="Líderstvo">Leadership</span><span class="tag" data-sk="Medzinárodná spolupráca">Int'l collaboration</span>
         </div>
         <div class="skill-col reveal-el">
-          <h3>UNDER PRESSURE</h3>
-          <span class="tag">Teamwork</span><span class="tag">Communication</span><span class="tag">Adaptability</span><span class="tag">Stress tolerance</span><span class="tag">Discipline</span>
+          <h3 data-sk="POD TLAKOM">UNDER PRESSURE</h3>
+          <span class="tag" data-sk="Tímová práca">Teamwork</span><span class="tag" data-sk="Komunikácia">Communication</span><span class="tag" data-sk="Adaptabilita">Adaptability</span><span class="tag" data-sk="Odolnosť voči stresu">Stress tolerance</span><span class="tag" data-sk="Disciplína">Discipline</span>
         </div>
       </div>
     </div>
@@ -762,15 +800,15 @@
     <div class="wrap" style="max-width:820px;">
       <div class="head" style="margin-bottom:30px;">
         <span class="index">// 07</span>
-        <h2 style="font-size:clamp(28px,4vw,40px);">Also on the résumé</h2>
+        <h2 style="font-size:clamp(28px,4vw,40px);" data-sk="Ďalšie z životopisu">Also on the résumé</h2>
       </div>
       <div class="exp-row reveal-el">
-        <div class="exp-role">WAREHOUSE</div>
-        <div><div class="exp-title">Alza</div><div class="exp-desc">Picking and packing orders on the conveyor system, working independently with heavier items.</div></div>
+        <div class="exp-role" data-sk="SKLAD">WAREHOUSE</div>
+        <div><div class="exp-title">Alza</div><div class="exp-desc" data-sk="Vychystávanie a balenie objednávok na dopravníkovom systéme, samostatná práca s ťažším tovarom.">Picking and packing orders on the conveyor system, working independently with heavier items.</div></div>
       </div>
       <div class="exp-row reveal-el">
-        <div class="exp-role">BARTENDING</div>
-        <div><div class="exp-title">Festival bar</div><div class="exp-desc">Mixing drinks and tapping beer through high-volume shifts — fast, customer-facing, team-run.</div></div>
+        <div class="exp-role" data-sk="BARMANSTVO">BARTENDING</div>
+        <div><div class="exp-title" data-sk="Festivalový bar">Festival bar</div><div class="exp-desc" data-sk="Miešanie drinkov a čapovanie piva počas rušných zmien — rýchle tempo, kontakt so zákazníkmi, tímová práca.">Mixing drinks and tapping beer through high-volume shifts — fast, customer-facing, team-run.</div></div>
       </div>
     </div>
   </section>
@@ -779,7 +817,7 @@
   <section class="contact" id="contact">
     <div class="wrap">
       <span class="index reveal-el" style="display:block; margin-bottom:18px;">// 08</span>
-      <h2 class="reveal-el">Let's build<br>something interesting.</h2>
+      <h2 class="reveal-el" data-sk="Poďme postaviť<br>niečo zaujímavé.">Let's build<br>something interesting.</h2>
       <div class="contact-links reveal-el">
         <a href="mailto:danysto08@gmail.com">danysto08@gmail.com</a>
         <a href="https://www.instagram.com/daniel._kooo" target="_blank" rel="noopener">@daniel._kooo</a>
@@ -791,7 +829,7 @@
 
 <footer>
   <span>Daniel Štorcel — 2026</span>
-  <span>Bratislava, Slovakia</span>
+  <span data-sk="Bratislava, Slovensko">Bratislava, Slovakia</span>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -817,6 +855,50 @@
   menu.querySelectorAll('a').forEach(function(a){
     a.addEventListener('click', function(){ menu.classList.remove('open'); burger.classList.remove('open'); });
   });
+
+  // ---------- Language switch (EN <-> SK) ----------
+  // English text stays in the HTML; Slovak text lives in data-sk / data-sk-alt.
+  var LANG_KEY = 'ds-lang';
+  var textEls = Array.prototype.slice.call(document.querySelectorAll('[data-sk]'));
+  var altEls  = Array.prototype.slice.call(document.querySelectorAll('[data-sk-alt]'));
+  var langBtns = Array.prototype.slice.call(document.querySelectorAll('.lang button'));
+
+  // remember the original English so we can switch back
+  textEls.forEach(function(el){ el.__en = el.innerHTML; });
+  altEls.forEach(function(el){ el.__enAlt = el.getAttribute('alt'); });
+
+  function applyLang(lang){
+    var sk = (lang === 'sk');
+    textEls.forEach(function(el){ el.innerHTML = sk ? el.getAttribute('data-sk') : el.__en; });
+    altEls.forEach(function(el){ el.setAttribute('alt', sk ? el.getAttribute('data-sk-alt') : el.__enAlt); });
+    document.documentElement.setAttribute('lang', sk ? 'sk' : 'en');
+    burger.setAttribute('aria-label', sk ? 'Otvoriť menu' : 'Open menu');
+    langBtns.forEach(function(b){
+      var on = b.getAttribute('data-lang') === (sk ? 'sk' : 'en');
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+
+  function getSavedLang(){
+    try { var v = localStorage.getItem(LANG_KEY); return (v === 'sk' || v === 'en') ? v : 'en'; }
+    catch(e){ return 'en'; }
+  }
+  function saveLang(lang){
+    try { localStorage.setItem(LANG_KEY, lang); } catch(e){}
+  }
+
+  langBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      var lang = b.getAttribute('data-lang');
+      applyLang(lang);
+      saveLang(lang);
+      // text length changed -> re-measure scroll animations (pinned mountain gallery etc.)
+      if(window.ScrollTrigger){ requestAnimationFrame(function(){ ScrollTrigger.refresh(); }); }
+    });
+  });
+
+  applyLang(getSavedLang());
 
   // Topographic hero SVG — generate contour-like paths
   var svg = document.getElementById('topoSvg');
