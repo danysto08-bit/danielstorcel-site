@@ -193,7 +193,6 @@
   }
   .traits span:hover{ border-color:var(--green); color:var(--text); }
   .about-sticky{ position:sticky; top:120px; align-self:start; }
-  @media (max-width:860px){ .about-sticky{ position:static; } }
   .about-sticky .kicker{ font-family:var(--mono); font-size:12px; color:var(--green); margin-bottom:16px; display:block; }
   .interest-list{ display:flex; flex-direction:column; gap:0; }
   .interest-list div{
@@ -203,14 +202,67 @@
   .interest-list div span:last-child{ color:var(--text-faint); }
 
   /* ---------- Achievements ---------- */
-  .ach-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
-  @media (max-width:700px){ .ach-grid{ grid-template-columns:1fr; } }
-  .ach-card{ background:var(--bg); padding:36px 32px; position:relative; }
-  .ach-card::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--green); transform:scaleY(0); transform-origin:top; transition:transform .5s ease; }
+  /* Cards keep their own height (align-items:start) so only the hovered one grows; borders are per-card and overlap by 1px */
+  .ach-grid{ display:grid; grid-template-columns:repeat(2,1fr); align-items:start; }
+  .ach-grid > .ach-card:nth-child(even){ margin-left:-1px; }
+  .ach-grid > .ach-card:nth-child(n+3){ margin-top:-1px; }
+  @media (max-width:700px){
+    .ach-grid{ grid-template-columns:1fr; }
+    .ach-grid > .ach-card:nth-child(even){ margin-left:0; }
+    .ach-grid > .ach-card:nth-child(n+2){ margin-top:-1px; }
+  }
+  .ach-card{ background:var(--bg); padding:36px 32px; position:relative; border:1px solid var(--line); }
+  .ach-card::before{ content:''; position:absolute; left:-1px; top:-1px; bottom:-1px; width:2px; background:var(--green); transform:scaleY(0); transform-origin:top; transition:transform .5s ease; }
   .ach-card.reveal::before{ transform:scaleY(1); }
   .ach-stat{ font-family:var(--serif-display); font-size:56px; color:var(--green); line-height:1; }
   .ach-title{ font-size:16px; font-weight:600; margin-top:16px; }
   .ach-desc{ font-size:14px; color:var(--text-dim); margin-top:8px; line-height:1.55; max-width:360px; }
+
+  /* Expandable details */
+  .ach-card{ cursor:pointer; outline:none; transition:background .35s ease; }
+  @media (min-width:701px){ .ach-card{ min-height:248px; } }
+  @media (min-width:701px) and (max-width:860px){ .ach-card{ min-height:264px; } }
+  .ach-card:is(.is-open, :focus-visible){ z-index:1; }
+  .ach-hint{
+    position:absolute; top:24px; right:26px; display:flex; align-items:center; gap:9px;
+    font-family:var(--mono); font-size:11px; color:var(--text-faint); transition:color .3s ease;
+  }
+  .ach-hint i{
+    font-style:normal; width:22px; height:22px; border:1px solid var(--line-strong); border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center; font-size:14px; line-height:1;
+    transition:transform .4s ease, border-color .3s ease, color .3s ease;
+  }
+  .ach-more{
+    display:grid; grid-template-rows:0fr; opacity:0;
+    transition:grid-template-rows .5s cubic-bezier(.2,.7,.2,1), opacity .35s ease;
+  }
+  .ach-more-inner{ overflow:hidden; min-height:0; }
+  .ach-more ul{
+    list-style:none; margin-top:22px; padding-top:20px; border-top:1px solid var(--line);
+    display:grid; gap:12px; max-width:480px;
+  }
+  .ach-more li{ position:relative; padding-left:20px; font-size:13.5px; line-height:1.55; color:var(--text-dim); }
+  .ach-more li::before{ content:''; position:absolute; left:0; top:0.78em; width:10px; height:1px; background:var(--green); }
+  .ach-more li b{ color:var(--text); font-weight:600; }
+  .ach-photo{ margin-top:22px; border:1px solid var(--line); border-radius:2px; overflow:hidden; background:var(--bg-alt); }
+  .ach-photo img{
+    width:100%; height:auto; aspect-ratio:4/3; object-fit:cover; object-position:var(--pos, 50% 50%);
+    filter:saturate(0.92) contrast(1.04);
+  }
+
+  .ach-card:is(.is-open, :focus-visible){ background:var(--surface); }
+  .ach-card:is(.is-open, :focus-visible) .ach-more{ grid-template-rows:1fr; opacity:1; }
+  .ach-card:is(.is-open, :focus-visible) .ach-hint{ color:var(--green); }
+  .ach-card:is(.is-open, :focus-visible) .ach-hint i{ transform:rotate(45deg); border-color:var(--green); }
+  @media (hover:hover){
+    .ach-card:hover{ background:var(--surface); z-index:1; }
+    .ach-card:hover .ach-more{ grid-template-rows:1fr; opacity:1; }
+    .ach-card:hover .ach-hint{ color:var(--green); }
+    .ach-card:hover .ach-hint i{ transform:rotate(45deg); border-color:var(--green); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ach-more, .ach-hint i, .ach-card{ transition:none; }
+  }
 
   /* ---------- Projects ---------- */
   .proj-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:24px; }
@@ -289,13 +341,7 @@
     display:flex; flex-direction:column; align-items:center; gap:6px; font-family:var(--mono);
     font-size:9px; letter-spacing:0.13em; color:var(--green); white-space:nowrap;
     text-shadow:0 0 14px var(--green-glow);
-    opacity:1; transition:opacity .5s ease;
-    pointer-events:none;
   }
-  .summit-scroll-hint.fade{ opacity:0; }
-  .summit-scroll-hint .txt{ animation: summit-hint-pulse 1.8s ease-in-out infinite; }
-  @keyframes summit-hint-pulse{ 0%,100%{ opacity:0.6; } 50%{ opacity:1; } }
-  @media (prefers-reduced-motion: reduce){ .summit-scroll-hint .txt{ animation:none; } }
   .summit-scroll-hint .arrow{
     width:8px; height:8px; border-right:1.5px solid var(--green); border-bottom:1.5px solid var(--green);
     transform:rotate(45deg); animation:summit-scroll-hint 1.5s ease-in-out infinite;
@@ -376,14 +422,6 @@
   .reveal-el{ opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease; }
   .reveal-el.in{ opacity:1; transform:translateY(0); }
   @media (prefers-reduced-motion: reduce){ .reveal-el{ opacity:1; transform:none; transition:none; } }
-
-  /* ---------- Language switch ---------- */
-  .logo-group{ display:flex; flex-direction:column; gap:8px; }
-  .lang-switch{ display:flex; align-items:center; gap:6px; font-family:var(--mono); font-size:10.5px; letter-spacing:0.04em; }
-  .lang-switch button{ background:none; border:none; padding:0; margin:0; cursor:pointer; color:var(--text-faint); font-family:var(--mono); font-size:10.5px; letter-spacing:0.04em; transition:color .2s ease; }
-  .lang-switch button:hover{ color:var(--text); }
-  .lang-switch button.active{ color:var(--green); cursor:default; }
-  .lang-switch .sep{ color:var(--text-faint); }
 </style>
 </head>
 <body>
@@ -391,30 +429,25 @@
 <div class="grain"></div>
 
 <header id="siteHeader">
-  <div class="logo-group">
-    <a href="#top" class="logo">D<span>.</span>Š<span>.</span></a>
-    <div class="lang-switch" id="langSwitch" role="group" aria-label="Language switch">
-      <button type="button" class="active" data-lang="en">EN</button><span class="sep">/</span><button type="button" data-lang="sk">SK</button>
-    </div>
-  </div>
+  <a href="#top" class="logo">D<span>.</span>Š<span>.</span></a>
   <nav class="desktop">
-    <a href="#about" data-i18n="nav.about">About</a>
-    <a href="#achievements" data-i18n="nav.record">Record</a>
-    <a href="#work" data-i18n="nav.work">Work</a>
-    <a href="#research" data-i18n="nav.research">Research</a>
-    <a href="#summit" data-i18n="nav.summit">Summit</a>
-    <a href="#contact" data-i18n="nav.contact">Contact</a>
+    <a href="#about">About</a>
+    <a href="#achievements">Record</a>
+    <a href="#work">Work</a>
+    <a href="#research">Research</a>
+    <a href="#summit">Summit</a>
+    <a href="#contact">Contact</a>
   </nav>
   <button class="burger" id="burgerBtn" aria-label="Open menu" aria-expanded="false"><span></span></button>
 </header>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#about"><span class="idx">01</span><span data-i18n="nav.about">About</span></a>
-  <a href="#achievements"><span class="idx">02</span><span data-i18n="nav.record">Record</span></a>
-  <a href="#work"><span class="idx">03</span><span data-i18n="nav.work">Work</span></a>
-  <a href="#research"><span class="idx">04</span><span data-i18n="nav.research">Research</span></a>
-  <a href="#summit"><span class="idx">05</span><span data-i18n="nav.summit">Summit</span></a>
-  <a href="#contact"><span class="idx">06</span><span data-i18n="nav.contact">Contact</span></a>
+  <a href="#about"><span class="idx">01</span>About</a>
+  <a href="#achievements"><span class="idx">02</span>Record</a>
+  <a href="#work"><span class="idx">03</span>Work</a>
+  <a href="#research"><span class="idx">04</span>Research</a>
+  <a href="#summit"><span class="idx">05</span>Summit</a>
+  <a href="#contact"><span class="idx">06</span>Contact</a>
 </div>
 
 <main id="top">
@@ -424,17 +457,17 @@
     <img class="hero-photo" src="hero-daniel.jpg" alt="Daniel Štorcel by a canal at night">
     <svg class="topo" id="topoSvg" viewBox="0 0 1200 800" preserveAspectRatio="none" aria-hidden="true"></svg>
     <div class="hero-content">
-      <div class="hero-eyebrow"><span class="dot"></span><span data-i18n="hero.eyebrow">Bratislava, Slovakia — final year</span></div>
+      <div class="hero-eyebrow"><span class="dot"></span>Bratislava, Slovakia — final year</div>
       <h1 class="name">DANIEL<br><span class="last">ŠTORCEL</span></h1>
-      <p class="hero-sub" data-i18n="hero.sub">
+      <p class="hero-sub">
         Two years in Slovakia's <b>Top 5</b> for critical thinking. A research project at the <b>Slovak Academy of Sciences</b>.
         A startup with a dragon on it. A mountain that isn't climbed yet.
       </p>
       <div class="hero-tags">
-        <span data-i18n="tag.tech">Technology</span><span data-i18n="tag.ai">AI</span><span data-i18n="tag.entrepreneurship">Entrepreneurship</span><span data-i18n="tag.research">Research</span><span data-i18n="tag.mountains">Mountains</span>
+        <span>Technology</span><span>AI</span><span>Entrepreneurship</span><span>Research</span><span>Mountains</span>
       </div>
     </div>
-    <div class="scroll-cue"><div class="track"></div><span data-i18n="scroll">SCROLL</span></div>
+    <div class="scroll-cue"><div class="track"></div>SCROLL</div>
   </section>
 
   <hr class="hair">
@@ -443,28 +476,28 @@
   <section class="pad" id="about">
     <div class="wrap about-grid">
       <div class="about-sticky reveal-el">
-        <span class="kicker" data-i18n="about.kicker">// 01 — About</span>
+        <span class="kicker">// 01 — About</span>
         <div class="interest-list">
-          <div><span data-i18n="interest.tech.label">Tech &amp; AI</span><span data-i18n="interest.tech.value">curious</span></div>
-          <div><span data-i18n="interest.marketing.label">Marketing &amp; brand</span><span data-i18n="interest.marketing.value">hands-on</span></div>
-          <div><span data-i18n="interest.science.label">Science &amp; research</span><span data-i18n="interest.science.value">SAV</span></div>
-          <div><span data-i18n="interest.mountains.label">Mountains</span><span data-i18n="interest.mountains.value">ongoing</span></div>
+          <div><span>Tech &amp; AI</span><span>curious</span></div>
+          <div><span>Marketing &amp; brand</span><span>hands-on</span></div>
+          <div><span>Science &amp; research</span><span>SAV</span></div>
+          <div><span>Mountains</span><span>ongoing</span></div>
         </div>
       </div>
       <div class="about-copy">
-        <p class="reveal-el" data-i18n="about.p1">
+        <p class="reveal-el">
           I like figuring things out that aren't on the curriculum. Some weeks that's a Python script or a cybersecurity
           rabbit hole; other weeks it's a pitch deck, a training plan, or the chemistry of a thin film under a microscope.
           I don't think of these as separate lanes — they're just what I'm curious about that month.
         </p>
-        <p class="reveal-el" data-i18n="about.p2">
+        <p class="reveal-el">
           I'm competitive by nature and calm under pressure — I've worked warehouse shifts and bartended festivals,
           led a marketing track on an international team, and sat with lab equipment for hours getting a sample right.
           What connects it is the same instinct: build it, test it, see if it holds up.
         </p>
         <div class="traits reveal-el">
-          <span data-i18n="trait.ambitious">Ambitious</span><span data-i18n="trait.curious">Curious</span><span data-i18n="trait.team">Team-oriented</span><span data-i18n="trait.resilient">Resilient</span>
-          <span data-i18n="trait.competitive">Competitive</span><span data-i18n="trait.selfmotivated">Self-motivated</span><span data-i18n="trait.entrepreneurial">Entrepreneurial</span><span data-i18n="trait.pressure">Works well under pressure</span>
+          <span>Ambitious</span><span>Curious</span><span>Team-oriented</span><span>Resilient</span>
+          <span>Competitive</span><span>Self-motivated</span><span>Entrepreneurial</span><span>Works well under pressure</span>
         </div>
       </div>
     </div>
@@ -477,29 +510,64 @@
     <div class="wrap">
       <div class="head">
         <span class="index">// 02</span>
-        <h2 data-i18n="ach.h2">Track record</h2>
-        <p data-i18n="ach.p">Competitions I've shown up for, across reasoning, business, and innovation.</p>
+        <h2>Track record</h2>
+        <p>Competitions I've shown up for, across reasoning, business, and innovation.</p>
       </div>
       <div class="ach-grid">
-        <div class="ach-card reveal-el">
-          <div class="ach-stat" data-i18n="ach1.stat">Top 5</div>
-          <div class="ach-title" data-i18n="ach1.title">Slovak Critical Thinking Competition</div>
-          <div class="ach-desc" data-i18n="ach1.desc">Placed in the national Top 5 two years in a row — reasoning and analysis under time pressure.</div>
+        <div class="ach-card reveal-el" tabindex="0">
+          <span class="ach-hint" aria-hidden="true"><span>details</span><i>+</i></span>
+          <div class="ach-stat">Top 5</div>
+          <div class="ach-title">Slovak Critical Thinking Competition</div>
+          <div class="ach-desc">Placed in the national Top 5 two years in a row — reasoning and analysis under time pressure.</div>
+          <div class="ach-more"><div class="ach-more-inner"><ul>
+            <li>Nationwide competition focused on <b>critical thinking, argumentation, media literacy</b>, working with data and exposing manipulative claims.</li>
+            <li>In 2024/25, <b>11,117 students</b> entered the secondary-school round — only the <b>top 48</b> reached the national final.</li>
+            <li>Finished in the <b>national Top 5 in two consecutive years</b>.</li>
+            <li>Timed tests demanded fast analysis of arguments, statistics, sources and manipulation techniques.</li>
+            <li>The final adds argumentation and public speaking on top of the written tests.</li>
+          </ul>
+            <figure class="ach-photo"><img src="ach-critical-thinking.jpg" alt="Speaker at the podium in a grand baroque hall during the critical thinking competition ceremony, audience in the foreground" width="900" height="1200" style="--pos:50% 42%" decoding="async"></figure>
+          </div></div>
         </div>
-        <div class="ach-card reveal-el">
-          <div class="ach-stat" data-i18n="ach2.stat">1st</div>
-          <div class="ach-title" data-i18n="ach2.title">European Statistics Competition</div>
-          <div class="ach-desc" data-i18n="ach2.desc">1st place in Slovakia, plus a result at European level.</div>
+        <div class="ach-card reveal-el" tabindex="0">
+          <span class="ach-hint" aria-hidden="true"><span>details</span><i>+</i></span>
+          <div class="ach-stat">1st</div>
+          <div class="ach-title">European Statistics Competition</div>
+          <div class="ach-desc">1st place in Slovakia, plus a result at European level.</div>
+          <div class="ach-more"><div class="ach-more-inner"><ul>
+            <li>Slovak 2025/26 edition: about <b>2,140 students</b> from <b>179 schools</b> in <b>807 teams</b>.</li>
+            <li>Europe-wide: <b>28,832 students</b> from <b>22 countries</b> in <b>9,096 teams</b>.</li>
+            <li>The national phase was <b>three statistics tests</b>; the best teams advanced.</li>
+            <li>The European round: a <b>2-minute video in English</b> that builds a "statistical portrait" of a country from official statistical data.</li>
+            <li>Slovakia had <b>four teams</b> in the European final, and <b>three Slovak videos</b> made the European Top 5.</li>
+          </ul>
+            <figure class="ach-photo"><img src="ach-statistics.jpg" alt="Waving the Slovak flag in front of a glass building at the European Statistics Competition" width="900" height="1200" style="--pos:50% 38%" decoding="async"></figure>
+          </div></div>
         </div>
-        <div class="ach-card reveal-el">
-          <div class="ach-stat" data-i18n="ach3.stat">1st</div>
-          <div class="ach-title" data-i18n="ach3.title">JA Europe Foodathon</div>
-          <div class="ach-desc" data-i18n="ach3.desc">Innovation Award, international round — marketing, finance and presentation for our team's concept.</div>
+        <div class="ach-card reveal-el" tabindex="0">
+          <span class="ach-hint" aria-hidden="true"><span>details</span><i>+</i></span>
+          <div class="ach-stat">1st</div>
+          <div class="ach-title">JA Europe Foodathon</div>
+          <div class="ach-desc">Innovation Award, international round — marketing, finance and presentation for our team's concept.</div>
+          <div class="ach-more"><div class="ach-more-inner"><ul>
+            <li>Won the <b>International Innovation Award</b> at JA Europe Foodathon.</li>
+            <li>Developed a <b>student venture concept</b> in an international team, working with European and African students.</li>
+            <li>My role: <b>led marketing and financial planning</b>.</li>
+            <li>Produced promotional content and contributed to the <b>final pitch</b>.</li>
+          </ul>
+            <figure class="ach-photo"><img src="ach-foodathon.jpg" alt="Team Carbon Trail (JA Slovakia) on stage holding the Foodathon 2024 winners certificate" width="900" height="1098" style="--pos:50% 100%;aspect-ratio:1/1" decoding="async"></figure>
+          </div></div>
         </div>
-        <div class="ach-card reveal-el">
-          <div class="ach-stat" data-i18n="ach4.stat">3rd</div>
-          <div class="ach-title" data-i18n="ach4.title">European Business Challenge</div>
-          <div class="ach-desc" data-i18n="ach4.desc">3rd in the Slovak round, 3rd overall in the European final.</div>
+        <div class="ach-card reveal-el" tabindex="0">
+          <span class="ach-hint" aria-hidden="true"><span>details</span><i>+</i></span>
+          <div class="ach-stat">3rd</div>
+          <div class="ach-title">European Business Challenge</div>
+          <div class="ach-desc">3rd in the Slovak round, 3rd overall in the European final.</div>
+          <div class="ach-more"><div class="ach-more-inner"><ul>
+            <li><b>3rd place in the Slovak round</b> and <b>3rd overall in the European final</b>.</li>
+            <li>Developed and presented a complete <b>business concept</b> as a team.</li>
+            <li>My contribution: the <b>business model, marketing strategy, financial planning</b> and the final pitch.</li>
+          </ul></div></div>
         </div>
       </div>
     </div>
@@ -512,50 +580,50 @@
     <div class="wrap">
       <div class="head">
         <span class="index">// 03</span>
-        <h2 data-i18n="proj.h2">Things I've built</h2>
-        <p data-i18n="proj.p">Startup concepts, brand experiments, and ideas I keep coming back to.</p>
+        <h2>Things I've built</h2>
+        <p>Startup concepts, brand experiments, and ideas I keep coming back to.</p>
       </div>
       <div class="proj-grid">
 
         <div class="proj-card reveal-el">
           <div class="proj-top">
             <div class="proj-name">CarbonTrail</div>
-            <span class="status" data-i18n="proj1.status">Award-winning</span>
+            <span class="status">Award-winning</span>
           </div>
-          <p class="proj-desc" data-i18n="proj1.desc">A student innovation concept built with a team in under a weekend for JA Europe Foodathon, refined with a mentor into a pitch-ready product.</p>
-          <p class="proj-contrib" data-i18n="proj1.contrib"><b>My part:</b> marketing, finance, the promo video, and communicating with our African counterparts on the team.</p>
-          <div class="proj-skills"><span data-i18n="skill.marketing">Marketing</span><span data-i18n="skill.finance">Finance</span><span data-i18n="skill.video">Video</span><span data-i18n="skill.pitching">Pitching</span></div>
+          <p class="proj-desc">A student innovation concept built with a team in under a weekend for JA Europe Foodathon, refined with a mentor into a pitch-ready product.</p>
+          <p class="proj-contrib"><b>My part:</b> marketing, finance, the promo video, and communicating with our African counterparts on the team.</p>
+          <div class="proj-skills"><span>Marketing</span><span>Finance</span><span>Video</span><span>Pitching</span></div>
         </div>
 
         <div class="proj-card reveal-el">
           <div class="proj-top">
             <div class="proj-name">Grynade</div>
-            <span class="status" data-i18n="proj2.status">Student project</span>
+            <span class="status">Student project</span>
           </div>
-          <p class="proj-desc" data-i18n="proj2.desc">A hardcore preworkout brand concept — neon green, black, a grenade and a dragon. "STAY LOCKED IN." Built to learn branding and social growth by doing it.</p>
-          <p class="proj-contrib" data-i18n="proj2.contrib"><b>My part:</b> identity, TikTok strategy, and a "Veiny Galaxy" campaign that pulled ~10k likes.</p>
-          <div class="proj-skills"><span data-i18n="skill.branding">Branding</span><span data-i18n="skill.tiktok">TikTok</span><span data-i18n="skill.socialgrowth">Social growth</span></div>
+          <p class="proj-desc">A hardcore preworkout brand concept — neon green, black, a grenade and a dragon. "STAY LOCKED IN." Built to learn branding and social growth by doing it.</p>
+          <p class="proj-contrib"><b>My part:</b> identity, TikTok strategy, and a "Veiny Galaxy" campaign that pulled ~10k likes.</p>
+          <div class="proj-skills"><span>Branding</span><span>TikTok</span><span>Social growth</span></div>
           <a class="proj-link" href="https://grynade.store" target="_blank" rel="noopener">grynade.store ↗</a>
         </div>
 
         <div class="proj-card reveal-el">
           <div class="proj-top">
             <div class="proj-name">TARO</div>
-            <span class="status" data-i18n="proj3.status">Concept</span>
+            <span class="status">Concept</span>
           </div>
-          <p class="proj-desc" data-i18n="proj3.desc">A non-profit concept connecting Erasmus+, international students, and mountain expeditions — community and personal growth through adventure.</p>
-          <p class="proj-contrib" data-i18n="proj3.contrib"><b>My part:</b> the concept and a distinct visual identity for its site.</p>
-          <div class="proj-skills"><span data-i18n="skill.conceptdesign">Concept design</span><span data-i18n="skill.webidentity">Web identity</span><span data-i18n="skill.community">Community</span></div>
+          <p class="proj-desc">A non-profit concept connecting Erasmus+, international students, and mountain expeditions — community and personal growth through adventure.</p>
+          <p class="proj-contrib"><b>My part:</b> the concept and a distinct visual identity for its site.</p>
+          <div class="proj-skills"><span>Concept design</span><span>Web identity</span><span>Community</span></div>
         </div>
 
         <div class="proj-card reveal-el">
           <div class="proj-top">
             <div class="proj-name">AI × Mountains</div>
-            <span class="status" data-i18n="proj4.status">Idea</span>
+            <span class="status">Idea</span>
           </div>
-          <p class="proj-desc" data-i18n="proj4.desc">A platform idea for hikers and mountaineers — surfacing suitable routes, outdoor experiences, and discounted gear across stores using AI.</p>
-          <p class="proj-contrib" data-i18n="proj4.contrib"><b>My part:</b> the original idea, unbuilt so far.</p>
-          <div class="proj-skills"><span data-i18n="skill.ai">AI</span><span data-i18n="skill.outdoor">Outdoor</span><span data-i18n="skill.productthinking">Product thinking</span></div>
+          <p class="proj-desc">A platform idea for hikers and mountaineers — surfacing suitable routes, outdoor experiences, and discounted gear across stores using AI.</p>
+          <p class="proj-contrib"><b>My part:</b> the original idea, unbuilt so far.</p>
+          <div class="proj-skills"><span>AI</span><span>Outdoor</span><span>Product thinking</span></div>
         </div>
 
       </div>
@@ -568,14 +636,14 @@
       <div>
         <div class="head" style="margin-bottom:24px;">
           <span class="index">// 04</span>
-          <h2 data-i18n="research.h2">Research at SAV</h2>
+          <h2>Research at SAV</h2>
         </div>
-        <p class="research-topic reveal-el" data-i18n="research.topic">
+        <p class="research-topic reveal-el">
           "Influence of deposition of atomic layers of zinc oxide on the structure of a carbon-silicon electrode"
           — a project carried out at the Slovak Academy of Sciences.
         </p>
         <div class="research-meta reveal-el">
-          <span>ALD · ZnO</span><span data-i18n="research.meta.fib">FIB cross-sections</span><span data-i18n="research.meta.edx">EDX analysis</span><span data-i18n="research.meta.cycles">10 vs 20 cycles</span>
+          <span>ALD · ZnO</span><span>FIB cross-sections</span><span>EDX analysis</span><span>10 vs 20 cycles</span>
         </div>
         <div class="fib-table reveal-el">
           <div class="row"><span>30 × 20 × 20 µm</span><span>50 nA</span></div>
@@ -588,19 +656,19 @@
       <div class="process reveal-el">
         <div class="process-step">
           <div class="n">01</div>
-          <div><div class="t" data-i18n="process1.t">Question</div><div class="d" data-i18n="process1.d">Does an ALD-deposited ZnO layer change the structure of a silicon-graphite electrode, and how?</div></div>
+          <div><div class="t">Question</div><div class="d">Does an ALD-deposited ZnO layer change the structure of a silicon-graphite electrode, and how?</div></div>
         </div>
         <div class="process-step">
           <div class="n">02</div>
-          <div><div class="t" data-i18n="process2.t">Experiment</div><div class="d" data-i18n="process2.d">Prepared FIB cross-sections at varying beam currents and cut sizes, comparing samples after 10 and 20 ALD cycles.</div></div>
+          <div><div class="t">Experiment</div><div class="d">Prepared FIB cross-sections at varying beam currents and cut sizes, comparing samples after 10 and 20 ALD cycles.</div></div>
         </div>
         <div class="process-step">
           <div class="n">03</div>
-          <div><div class="t" data-i18n="process3.t">Analysis</div><div class="d" data-i18n="process3.d">Examined the cross-sections with EDX to read composition and layer structure.</div></div>
+          <div><div class="t">Analysis</div><div class="d">Examined the cross-sections with EDX to read composition and layer structure.</div></div>
         </div>
         <div class="process-step">
           <div class="n">04</div>
-          <div><div class="t" data-i18n="process4.t">Presented as</div><div class="d" data-i18n="process4.d">A SOČ (student scientific research) project, written up at a research-institute level.</div></div>
+          <div><div class="t">Presented as</div><div class="d">A SOČ (student scientific research) project, written up at a research-institute level.</div></div>
         </div>
       </div>
     </div>
@@ -612,7 +680,7 @@
       <div style="text-align:center;">
         <span class="index" style="display:block; margin-bottom:10px;">// 05</span>
         <div class="summit-peak reveal-el">MONT BLANC</div>
-        <p class="summit-sub reveal-el" data-i18n="summit.sub">Some things get measured in grades. This one gets measured in altitude — and it isn't climbed yet. The goal is next summer.</p>
+        <p class="summit-sub reveal-el">Some things get measured in grades. This one gets measured in altitude — and it isn't climbed yet. The goal is next summer.</p>
       </div>
 
       <div class="summit-gallery">
@@ -630,37 +698,32 @@
         <figure class="summit-photo">
           <img src="mountain-view.jpg" alt="Daniel Štorcel looking across a mountain ridge">
         </figure>
-
-        <div class="summit-scroll-hint" id="summitScrollHint">
-          <span class="txt" data-i18n="scroll">SCROLL</span>
-          <span class="arrow"></span>
-        </div>
       </div>
 
       <div class="summit-line reveal-el">
-        <div class="peak-node done"><div class="dot"></div><div class="name">Gerlachovský štít</div><div class="tag" data-i18n="peak.tatras">highest in Slovakia</div></div>
+        <div class="peak-node done"><div class="dot"></div><div class="name">Gerlachovský štít</div><div class="tag">highest in Slovakia</div></div>
         <div class="peak-conn"></div>
-        <div class="peak-node done"><div class="dot"></div><div class="name">Traunstein</div><div class="tag" data-i18n="peak.austria">Austria</div></div>
+        <div class="peak-node done"><div class="dot"></div><div class="name">Traunstein</div><div class="tag">Austria</div></div>
         <div class="peak-conn"></div>
-        <div class="peak-node goal"><div class="dot"></div><div class="name">Mont Blanc</div><div class="tag" data-i18n="peak.goal">the goal — 2027</div></div>
+        <div class="peak-node goal"><div class="dot"></div><div class="name">Mont Blanc</div><div class="tag">the goal — 2027</div></div>
       </div>
 
       <div class="stat-row reveal-el">
-        <div class="stat-cell"><div class="stat-num">1:53</div><div class="stat-label" data-i18n="stat.half">HALF MARATHON</div></div>
-        <div class="stat-cell"><div class="stat-num">55:00</div><div class="stat-label" data-i18n="stat.10k">10KM</div></div>
-        <div class="stat-cell"><div class="stat-num">5:10/km</div><div class="stat-label" data-i18n="stat.pace">6KM BEST PACE</div></div>
+        <div class="stat-cell"><div class="stat-num">1:53</div><div class="stat-label">HALF MARATHON</div></div>
+        <div class="stat-cell"><div class="stat-num">55:00</div><div class="stat-label">10KM</div></div>
+        <div class="stat-cell"><div class="stat-num">5:10/km</div><div class="stat-label">6KM BEST PACE</div></div>
       </div>
 
       <div class="prep reveal-el">
-        <div data-i18n="prep1">Running &amp; endurance base, considering an Ironman</div>
-        <div data-i18n="prep2">Gym strength training</div>
-        <div data-i18n="prep3">Ferratas &amp; mountain experience</div>
-        <div data-i18n="prep4">Mountaineering technique</div>
-        <div data-i18n="prep5">Equipment preparation</div>
-        <div data-i18n="prep6">Documenting the whole build-up</div>
+        <div>Running &amp; endurance base, considering an Ironman</div>
+        <div>Gym strength training</div>
+        <div>Ferratas &amp; mountain experience</div>
+        <div>Mountaineering technique</div>
+        <div>Equipment preparation</div>
+        <div>Documenting the whole build-up</div>
       </div>
 
-      <p class="partners reveal-el" data-i18n="partners">Reached out about equipment partnerships to <b>The North Face, Patagonia, La Sportiva, Exped</b> and <b>Blue Ice</b> — conversations, not confirmed deals.</p>
+      <p class="partners reveal-el">Reached out about equipment partnerships to <b>The North Face, Patagonia, La Sportiva, Exped</b> and <b>Blue Ice</b> — conversations, not confirmed deals.</p>
     </div>
   </section>
 
@@ -669,24 +732,24 @@
     <div class="wrap">
       <div class="head">
         <span class="index">// 06</span>
-        <h2 data-i18n="skills.h2">What I work with</h2>
+        <h2>What I work with</h2>
       </div>
       <div class="skill-cols">
         <div class="skill-col reveal-el">
-          <h3 data-i18n="skillcol.tech">TECHNOLOGY</h3>
-          <span class="tag" data-i18n="skl.python">Python</span><span class="tag" data-i18n="skl.cyber">Cybersecurity</span><span class="tag" data-i18n="skl.aitools">AI tools</span><span class="tag" data-i18n="skl.vscode">VS Code</span><span class="tag" data-i18n="skl.copilot">Copilot &amp; Codex</span>
+          <h3>TECHNOLOGY</h3>
+          <span class="tag">Python</span><span class="tag">Cybersecurity</span><span class="tag">AI tools</span><span class="tag">VS Code</span><span class="tag">Copilot &amp; Codex</span>
         </div>
         <div class="skill-col reveal-el">
-          <h3 data-i18n="skillcol.creative">CREATIVE</h3>
-          <span class="tag" data-i18n="skl.videoedit">Video editing</span><span class="tag" data-i18n="skl.camera">Camera work</span><span class="tag" data-i18n="skl.content">Content creation</span><span class="tag" data-i18n="skl.branding2">Branding</span><span class="tag" data-i18n="skl.socialalg">Social algorithms</span>
+          <h3>CREATIVE</h3>
+          <span class="tag">Video editing</span><span class="tag">Camera work</span><span class="tag">Content creation</span><span class="tag">Branding</span><span class="tag">Social algorithms</span>
         </div>
         <div class="skill-col reveal-el">
-          <h3 data-i18n="skillcol.business">BUSINESS</h3>
-          <span class="tag" data-i18n="skl.marketing2">Marketing</span><span class="tag" data-i18n="skl.finance2">Finance</span><span class="tag" data-i18n="skl.pitching2">Pitching</span><span class="tag" data-i18n="skl.leadership">Leadership</span><span class="tag" data-i18n="skl.intlcollab">Int'l collaboration</span>
+          <h3>BUSINESS</h3>
+          <span class="tag">Marketing</span><span class="tag">Finance</span><span class="tag">Pitching</span><span class="tag">Leadership</span><span class="tag">Int'l collaboration</span>
         </div>
         <div class="skill-col reveal-el">
-          <h3 data-i18n="skillcol.pressure">UNDER PRESSURE</h3>
-          <span class="tag" data-i18n="skl.teamwork">Teamwork</span><span class="tag" data-i18n="skl.communication">Communication</span><span class="tag" data-i18n="skl.adaptability">Adaptability</span><span class="tag" data-i18n="skl.stress">Stress tolerance</span><span class="tag" data-i18n="skl.discipline">Discipline</span>
+          <h3>UNDER PRESSURE</h3>
+          <span class="tag">Teamwork</span><span class="tag">Communication</span><span class="tag">Adaptability</span><span class="tag">Stress tolerance</span><span class="tag">Discipline</span>
         </div>
       </div>
     </div>
@@ -699,15 +762,15 @@
     <div class="wrap" style="max-width:820px;">
       <div class="head" style="margin-bottom:30px;">
         <span class="index">// 07</span>
-        <h2 style="font-size:clamp(28px,4vw,40px);" data-i18n="exp.h2">Also on the résumé</h2>
+        <h2 style="font-size:clamp(28px,4vw,40px);">Also on the résumé</h2>
       </div>
       <div class="exp-row reveal-el">
-        <div class="exp-role" data-i18n="exp1.role">WAREHOUSE</div>
-        <div><div class="exp-title">Alza</div><div class="exp-desc" data-i18n="exp1.desc">Picking and packing orders on the conveyor system, working independently with heavier items.</div></div>
+        <div class="exp-role">WAREHOUSE</div>
+        <div><div class="exp-title">Alza</div><div class="exp-desc">Picking and packing orders on the conveyor system, working independently with heavier items.</div></div>
       </div>
       <div class="exp-row reveal-el">
-        <div class="exp-role" data-i18n="exp2.role">BARTENDING</div>
-        <div><div class="exp-title" data-i18n="exp2.title">Festival bar</div><div class="exp-desc" data-i18n="exp2.desc">Mixing drinks and tapping beer through high-volume shifts — fast, customer-facing, team-run.</div></div>
+        <div class="exp-role">BARTENDING</div>
+        <div><div class="exp-title">Festival bar</div><div class="exp-desc">Mixing drinks and tapping beer through high-volume shifts — fast, customer-facing, team-run.</div></div>
       </div>
     </div>
   </section>
@@ -716,7 +779,7 @@
   <section class="contact" id="contact">
     <div class="wrap">
       <span class="index reveal-el" style="display:block; margin-bottom:18px;">// 08</span>
-      <h2 class="reveal-el" data-i18n="contact.h2">Let's build<br>something interesting.</h2>
+      <h2 class="reveal-el">Let's build<br>something interesting.</h2>
       <div class="contact-links reveal-el">
         <a href="mailto:danysto08@gmail.com">danysto08@gmail.com</a>
         <a href="https://www.instagram.com/daniel._kooo" target="_blank" rel="noopener">@daniel._kooo</a>
@@ -728,7 +791,7 @@
 
 <footer>
   <span>Daniel Štorcel — 2026</span>
-  <span data-i18n="footer.loc">Bratislava, Slovakia</span>
+  <span>Bratislava, Slovakia</span>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -736,174 +799,6 @@
 <script>
 (function(){
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // ---------- Language switch (EN / SK) ----------
-  var translations = {
-    'nav.about': { en:'About', sk:'O mne' },
-    'nav.record': { en:'Record', sk:'Výsledky' },
-    'nav.work': { en:'Work', sk:'Projekty' },
-    'nav.research': { en:'Research', sk:'Výskum' },
-    'nav.summit': { en:'Summit', sk:'Vrchol' },
-    'nav.contact': { en:'Contact', sk:'Kontakt' },
-    'hero.eyebrow': { en:'Bratislava, Slovakia — final year', sk:'Bratislava, Slovensko — posledný ročník' },
-    'hero.sub': {
-      en:'Two years in Slovakia\'s <b>Top 5</b> for critical thinking. A research project at the <b>Slovak Academy of Sciences</b>. A startup with a dragon on it. A mountain that isn\'t climbed yet.',
-      sk:'Dva roky v slovenskej <b>Top 5</b> v kritickom myslení. Výskumný projekt na <b>Slovenskej akadémii vied</b>. Startup s drakom na logu. Hora, ktorá ešte nie je zdolaná.'
-    },
-    'scroll': { en:'SCROLL', sk:'SKROLUJ' },
-    'tag.tech': { en:'Technology', sk:'Technológie' },
-    'tag.ai': { en:'AI', sk:'AI' },
-    'tag.entrepreneurship': { en:'Entrepreneurship', sk:'Podnikanie' },
-    'tag.research': { en:'Research', sk:'Výskum' },
-    'tag.mountains': { en:'Mountains', sk:'Hory' },
-    'about.kicker': { en:'// 01 — About', sk:'// 01 — O mne' },
-    'interest.tech.label': { en:'Tech &amp; AI', sk:'Tech a AI' },
-    'interest.tech.value': { en:'curious', sk:'zvedavý' },
-    'interest.marketing.label': { en:'Marketing &amp; brand', sk:'Marketing a značka' },
-    'interest.marketing.value': { en:'hands-on', sk:'priamo v teréne' },
-    'interest.science.label': { en:'Science &amp; research', sk:'Veda a výskum' },
-    'interest.science.value': { en:'SAV', sk:'SAV' },
-    'interest.mountains.label': { en:'Mountains', sk:'Hory' },
-    'interest.mountains.value': { en:'ongoing', sk:'prebieha' },
-    'about.p1': {
-      en:'I like figuring things out that aren\'t on the curriculum. Some weeks that\'s a Python script or a cybersecurity rabbit hole; other weeks it\'s a pitch deck, a training plan, or the chemistry of a thin film under a microscope. I don\'t think of these as separate lanes — they\'re just what I\'m curious about that month.',
-      sk:'Rád riešim veci, ktoré nie sú v osnovách. Niektoré týždne je to Python skript alebo prepadnutie sa do kybernetickej bezpečnosti; iné týždne je to prezentácia pre investorov, tréningový plán alebo chémia tenkého filmu pod mikroskopom. Neberiem to ako oddelené oblasti — je to jednoducho to, čo ma daný mesiac zaujíma.'
-    },
-    'about.p2': {
-      en:'I\'m competitive by nature and calm under pressure — I\'ve worked warehouse shifts and bartended festivals, led a marketing track on an international team, and sat with lab equipment for hours getting a sample right. What connects it is the same instinct: build it, test it, see if it holds up.',
-      sk:'Som súťaživý od prirodzenosti a pokojný pod tlakom — odrobil som si zmeny v sklade, robil barmana na festivaloch, viedol marketingovú sekciu v medzinárodnom tíme a sedel hodiny pri laboratórnom vybavení, kým vyšla vzorka presne tak, ako mala. Spája to rovnaký inštinkt: postaviť to, otestovať to a zistiť, či to obstojí.'
-    },
-    'trait.ambitious': { en:'Ambitious', sk:'Ambiciózny' },
-    'trait.curious': { en:'Curious', sk:'Zvedavý' },
-    'trait.team': { en:'Team-oriented', sk:'Tímový hráč' },
-    'trait.resilient': { en:'Resilient', sk:'Odolný' },
-    'trait.competitive': { en:'Competitive', sk:'Súťaživý' },
-    'trait.selfmotivated': { en:'Self-motivated', sk:'Samostatný' },
-    'trait.entrepreneurial': { en:'Entrepreneurial', sk:'Podnikavý' },
-    'trait.pressure': { en:'Works well under pressure', sk:'Zvláda tlak' },
-    'ach.h2': { en:'Track record', sk:'Výsledky' },
-    'ach.p': { en:'Competitions I\'ve shown up for, across reasoning, business, and innovation.', sk:'Súťaže, na ktorých som sa zúčastnil — od logiky cez biznis až po inovácie.' },
-    'ach1.stat': { en:'Top 5', sk:'Top 5' },
-    'ach1.title': { en:'Slovak Critical Thinking Competition', sk:'Súťaž v kritickom myslení' },
-    'ach1.desc': { en:'Placed in the national Top 5 two years in a row — reasoning and analysis under time pressure.', sk:'Dva roky po sebe v celoslovenskej Top 5 — logika a analýza pod časovým tlakom.' },
-    'ach2.stat': { en:'1st', sk:'1. miesto' },
-    'ach2.title': { en:'European Statistics Competition', sk:'Európska štatistická súťaž' },
-    'ach2.desc': { en:'1st place in Slovakia, plus a result at European level.', sk:'1. miesto na Slovensku a umiestnenie aj na európskej úrovni.' },
-    'ach3.stat': { en:'1st', sk:'1. miesto' },
-    'ach3.title': { en:'JA Europe Foodathon', sk:'JA Europe Foodathon' },
-    'ach3.desc': { en:'Innovation Award, international round — marketing, finance and presentation for our team\'s concept.', sk:'Cena za inovácie, medzinárodné kolo — marketing, financie a prezentácia konceptu nášho tímu.' },
-    'ach4.stat': { en:'3rd', sk:'3. miesto' },
-    'ach4.title': { en:'European Business Challenge', sk:'European Business Challenge' },
-    'ach4.desc': { en:'3rd in the Slovak round, 3rd overall in the European final.', sk:'3. miesto v slovenskom kole, 3. miesto aj v európskom finále.' },
-    'proj.h2': { en:'Things I\'ve built', sk:'Čo som postavil' },
-    'proj.p': { en:'Startup concepts, brand experiments, and ideas I keep coming back to.', sk:'Startupové koncepty, brandové experimenty a nápady, ku ktorým sa stále vraciam.' },
-    'proj1.status': { en:'Award-winning', sk:'Ocenený projekt' },
-    'proj1.desc': { en:'A student innovation concept built with a team in under a weekend for JA Europe Foodathon, refined with a mentor into a pitch-ready product.', sk:'Študentský inovačný koncept, ktorý sme s tímom postavili za necelý víkend pre JA Europe Foodathon a s mentorom doladili do podoby pripravenej na prezentáciu investorom.' },
-    'proj1.contrib': { en:'<b>My part:</b> marketing, finance, the promo video, and communicating with our African counterparts on the team.', sk:'<b>Moja časť:</b> marketing, financie, propagačné video a komunikácia s africkými členmi tímu.' },
-    'skill.marketing': { en:'Marketing', sk:'Marketing' },
-    'skill.finance': { en:'Finance', sk:'Financie' },
-    'skill.video': { en:'Video', sk:'Video' },
-    'skill.pitching': { en:'Pitching', sk:'Prezentovanie' },
-    'proj2.status': { en:'Student project', sk:'Študentský projekt' },
-    'proj2.desc': { en:'A hardcore preworkout brand concept — neon green, black, a grenade and a dragon. "STAY LOCKED IN." Built to learn branding and social growth by doing it.', sk:'Koncept tvrdej preworkout značky — neónová zelená, čierna, granát a drak. "STAY LOCKED IN." Postavené preto, aby som sa naučil branding a rast na sociálnych sieťach priamo v praxi.' },
-    'proj2.contrib': { en:'<b>My part:</b> identity, TikTok strategy, and a "Veiny Galaxy" campaign that pulled ~10k likes.', sk:'<b>Moja časť:</b> identita značky, TikTok stratégia a kampaň "Veiny Galaxy", ktorá vytiahla ~10-tisíc lajkov.' },
-    'skill.branding': { en:'Branding', sk:'Branding' },
-    'skill.tiktok': { en:'TikTok', sk:'TikTok' },
-    'skill.socialgrowth': { en:'Social growth', sk:'Rast na sociálnych sieťach' },
-    'proj3.status': { en:'Concept', sk:'Koncept' },
-    'proj3.desc': { en:'A non-profit concept connecting Erasmus+, international students, and mountain expeditions — community and personal growth through adventure.', sk:'Neziskový koncept spájajúci Erasmus+, zahraničných študentov a horské expedície — komunita a osobný rast cez dobrodružstvo.' },
-    'proj3.contrib': { en:'<b>My part:</b> the concept and a distinct visual identity for its site.', sk:'<b>Moja časť:</b> koncept a výrazná vizuálna identita webu.' },
-    'skill.conceptdesign': { en:'Concept design', sk:'Návrh konceptu' },
-    'skill.webidentity': { en:'Web identity', sk:'Webová identita' },
-    'skill.community': { en:'Community', sk:'Komunita' },
-    'proj4.status': { en:'Idea', sk:'Nápad' },
-    'proj4.desc': { en:'A platform idea for hikers and mountaineers — surfacing suitable routes, outdoor experiences, and discounted gear across stores using AI.', sk:'Nápad na platformu pre turistov a horolezcov — pomocou AI odporúča vhodné trasy, zážitky v prírode a zľavnené vybavenie naprieč obchodmi.' },
-    'proj4.contrib': { en:'<b>My part:</b> the original idea, unbuilt so far.', sk:'<b>Moja časť:</b> pôvodný nápad, zatiaľ nepostavený.' },
-    'skill.ai': { en:'AI', sk:'AI' },
-    'skill.outdoor': { en:'Outdoor', sk:'Outdoor' },
-    'skill.productthinking': { en:'Product thinking', sk:'Produktové myslenie' },
-    'research.h2': { en:'Research at SAV', sk:'Výskum na SAV' },
-    'research.topic': { en:'"Influence of deposition of atomic layers of zinc oxide on the structure of a carbon-silicon electrode" — a project carried out at the Slovak Academy of Sciences.', sk:'"Vplyv depozície atómových vrstiev oxidu zinočnatého na štruktúru uhlíkovo-kremíkovej elektródy" — projekt realizovaný na Slovenskej akadémii vied.' },
-    'research.meta.fib': { en:'FIB cross-sections', sk:'FIB rezy' },
-    'research.meta.edx': { en:'EDX analysis', sk:'EDX analýza' },
-    'research.meta.cycles': { en:'10 vs 20 cycles', sk:'10 vs 20 cyklov' },
-    'process1.t': { en:'Question', sk:'Otázka' },
-    'process1.d': { en:'Does an ALD-deposited ZnO layer change the structure of a silicon-graphite electrode, and how?', sk:'Mení ALD vrstva ZnO štruktúru kremíkovo-grafitovej elektródy, a ak áno, ako?' },
-    'process2.t': { en:'Experiment', sk:'Experiment' },
-    'process2.d': { en:'Prepared FIB cross-sections at varying beam currents and cut sizes, comparing samples after 10 and 20 ALD cycles.', sk:'Pripravil som FIB rezy pri rôznych prúdoch lúča a veľkostiach rezu a porovnal vzorky po 10 a 20 ALD cykloch.' },
-    'process3.t': { en:'Analysis', sk:'Analýza' },
-    'process3.d': { en:'Examined the cross-sections with EDX to read composition and layer structure.', sk:'Rezy som analyzoval pomocou EDX, aby som zistil zloženie a štruktúru vrstiev.' },
-    'process4.t': { en:'Presented as', sk:'Prezentované ako' },
-    'process4.d': { en:'A SOČ (student scientific research) project, written up at a research-institute level.', sk:'Práca SOČ (stredoškolská odborná činnosť) spracovaná na úrovni výskumného ústavu.' },
-    'summit.sub': { en:'Some things get measured in grades. This one gets measured in altitude — and it isn\'t climbed yet. The goal is next summer.', sk:'Niektoré veci sa merajú známkami. Táto sa meria nadmorskou výškou — a ešte nie je zdolaná. Cieľom je budúce leto.' },
-    'peak.tatras': { en:'highest in Slovakia', sk:'najvyšší na Slovensku' },
-    'peak.austria': { en:'Austria', sk:'Rakúsko' },
-    'peak.goal': { en:'the goal — 2027', sk:'cieľ — 2027' },
-    'stat.half': { en:'HALF MARATHON', sk:'POLMARATÓN' },
-    'stat.10k': { en:'10KM', sk:'10KM' },
-    'stat.pace': { en:'6KM BEST PACE', sk:'NAJLEPŠIE TEMPO 6KM' },
-    'prep1': { en:'Running &amp; endurance base, considering an Ironman', sk:'Beh a vytrvalostný základ, zvažujem Ironman' },
-    'prep2': { en:'Gym strength training', sk:'Silový tréning v posilňovni' },
-    'prep3': { en:'Ferratas &amp; mountain experience', sk:'Ferraty a horské skúsenosti' },
-    'prep4': { en:'Mountaineering technique', sk:'Horolezecká technika' },
-    'prep5': { en:'Equipment preparation', sk:'Príprava vybavenia' },
-    'prep6': { en:'Documenting the whole build-up', sk:'Dokumentovanie celej prípravy' },
-    'partners': { en:'Reached out about equipment partnerships to <b>The North Face, Patagonia, La Sportiva, Exped</b> and <b>Blue Ice</b> — conversations, not confirmed deals.', sk:'Oslovil som ohľadom partnerstiev pre vybavenie značky <b>The North Face, Patagonia, La Sportiva, Exped</b> a <b>Blue Ice</b> — zatiaľ rozhovory, nie potvrdené dohody.' },
-    'skills.h2': { en:'What I work with', sk:'S čím pracujem' },
-    'skillcol.tech': { en:'TECHNOLOGY', sk:'TECHNOLÓGIE' },
-    'skillcol.creative': { en:'CREATIVE', sk:'KREATÍVA' },
-    'skillcol.business': { en:'BUSINESS', sk:'BIZNIS' },
-    'skillcol.pressure': { en:'UNDER PRESSURE', sk:'POD TLAKOM' },
-    'skl.python': { en:'Python', sk:'Python' },
-    'skl.cyber': { en:'Cybersecurity', sk:'Kybernetická bezpečnosť' },
-    'skl.aitools': { en:'AI tools', sk:'AI nástroje' },
-    'skl.vscode': { en:'VS Code', sk:'VS Code' },
-    'skl.copilot': { en:'Copilot &amp; Codex', sk:'Copilot a Codex' },
-    'skl.videoedit': { en:'Video editing', sk:'Strih videa' },
-    'skl.camera': { en:'Camera work', sk:'Práca s kamerou' },
-    'skl.content': { en:'Content creation', sk:'Tvorba obsahu' },
-    'skl.branding2': { en:'Branding', sk:'Branding' },
-    'skl.socialalg': { en:'Social algorithms', sk:'Algoritmy sociálnych sietí' },
-    'skl.marketing2': { en:'Marketing', sk:'Marketing' },
-    'skl.finance2': { en:'Finance', sk:'Financie' },
-    'skl.pitching2': { en:'Pitching', sk:'Prezentovanie' },
-    'skl.leadership': { en:'Leadership', sk:'Vedenie tímu' },
-    'skl.intlcollab': { en:'Int\'l collaboration', sk:'Medzinárodná spolupráca' },
-    'skl.teamwork': { en:'Teamwork', sk:'Tímová práca' },
-    'skl.communication': { en:'Communication', sk:'Komunikácia' },
-    'skl.adaptability': { en:'Adaptability', sk:'Adaptabilita' },
-    'skl.stress': { en:'Stress tolerance', sk:'Odolnosť voči stresu' },
-    'skl.discipline': { en:'Discipline', sk:'Disciplína' },
-    'exp.h2': { en:'Also on the résumé', sk:'Aj v životopise' },
-    'exp1.role': { en:'WAREHOUSE', sk:'SKLAD' },
-    'exp1.desc': { en:'Picking and packing orders on the conveyor system, working independently with heavier items.', sk:'Vychystávanie a balenie objednávok na dopravníkovom páse, samostatná práca aj s ťažším tovarom.' },
-    'exp2.role': { en:'BARTENDING', sk:'BARMANING' },
-    'exp2.title': { en:'Festival bar', sk:'Festivalový bar' },
-    'exp2.desc': { en:'Mixing drinks and tapping beer through high-volume shifts — fast, customer-facing, team-run.', sk:'Miešanie drinkov a čapovanie piva počas náročných zmien — rýchlo, v kontakte so zákazníkmi, v tíme.' },
-    'contact.h2': { en:'Let\'s build<br>something interesting.', sk:'Poďme spolu postaviť<br>niečo zaujímavé.' },
-    'footer.loc': { en:'Bratislava, Slovakia', sk:'Bratislava, Slovensko' }
-  };
-
-  function applySiteLang(lang){
-    document.documentElement.setAttribute('lang', lang);
-    document.querySelectorAll('[data-i18n]').forEach(function(el){
-      var entry = translations[el.getAttribute('data-i18n')];
-      if(entry && entry[lang] !== undefined){ el.innerHTML = entry[lang]; }
-    });
-    document.querySelectorAll('.lang-switch button').forEach(function(btn){
-      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
-    });
-    try{ localStorage.setItem('site-lang', lang); }catch(e){}
-  }
-  var langSwitchEl = document.getElementById('langSwitch');
-  if(langSwitchEl){
-    langSwitchEl.querySelectorAll('button').forEach(function(btn){
-      btn.addEventListener('click', function(){ applySiteLang(btn.getAttribute('data-lang')); });
-    });
-  }
-  var initialLang = 'en';
-  try{ initialLang = localStorage.getItem('site-lang') || 'en'; }catch(e){}
-  applySiteLang(initialLang);
 
   // Header background on scroll
   var header = document.getElementById('siteHeader');
@@ -961,6 +856,15 @@
       gsap.to(p, { strokeDashoffset:0, duration:1.8, delay: idx*0.08, ease:'power2.out' });
     });
     gsap.registerPlugin(ScrollTrigger);
+    // CSS `scroll-behavior:smooth` makes ScrollTrigger's internal scroll-to-top during a refresh animate instead of jump,
+    // so pin/trigger positions get measured at the wrong scroll offset (the summit gallery then pins in the wrong place).
+    // Force instant scrolling while it measures; reading the computed style flushes the change before ScrollTrigger scrolls.
+    var rootEl = document.documentElement;
+    ScrollTrigger.addEventListener('refreshInit', function(){
+      rootEl.style.scrollBehavior = 'auto';
+      void getComputedStyle(rootEl).scrollBehavior;
+    });
+    ScrollTrigger.addEventListener('refresh', function(){ rootEl.style.scrollBehavior = ''; });
     document.querySelectorAll('.reveal-el').forEach(function(el){
       gsap.fromTo(el, { opacity:0, y:24 }, {
         opacity:1, y:0, duration:0.8, ease:'power2.out',
@@ -987,14 +891,10 @@
         gsap.set(mountainDescriptions[0], { autoAlpha:1, x:0, y:0 });
         gsap.set(mountainDescriptions[1], { autoAlpha:0, x:42, y:0 });
         gsap.set(mountainDescriptions[2], { autoAlpha:0, x:42, y:0 });
-        var scrollHint = document.getElementById('summitScrollHint');
         gsap.timeline({
           scrollTrigger:{
             trigger:gallery, start:'top 110px', end:'+=250%', pin:true, scrub:0.7,
-            anticipatePin:1, invalidateOnRefresh:true,
-            onUpdate:function(self){
-              if(scrollHint){ scrollHint.classList.toggle('fade', self.progress > 0.03); }
-            }
+            anticipatePin:1, invalidateOnRefresh:true
           }
         })
         .to(mountainPhotos[0], { x:0, duration:0.8 })
@@ -1017,6 +917,18 @@
     document.querySelectorAll('.ach-card').forEach(function(el){ el.classList.add('reveal'); });
     createdPaths.forEach(function(p){ p.style.strokeDasharray = 'none'; });
   }
+
+  // Achievement cards: tap-to-expand on touch devices; keep ScrollTrigger positions in sync when height changes
+  var touchOnly = window.matchMedia('(hover: none)');
+  document.querySelectorAll('.ach-card').forEach(function(card){
+    card.addEventListener('click', function(){ if(touchOnly.matches){ card.classList.toggle('is-open'); } });
+    var more = card.querySelector('.ach-more');
+    if(more){
+      more.addEventListener('transitionend', function(e){
+        if(e.propertyName === 'grid-template-rows' && window.ScrollTrigger){ ScrollTrigger.refresh(); }
+      });
+    }
+  });
 
   // Fallback for reveal-el without gsap (in case CDN blocked)
   if(!window.gsap){
