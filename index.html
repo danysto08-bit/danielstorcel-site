@@ -38,12 +38,40 @@
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
   }
+  body.preloading{ overflow:hidden; height:100%; }
   ::selection{ background:var(--green); color:#0a0a0b; }
   img{ max-width:100%; display:block; }
   a{ color:inherit; }
   .wrap{ max-width:1200px; margin:0 auto; padding-inline: clamp(20px, 5vw, 64px); }
   section{ position:relative; }
   .hair{ height:1px; background:var(--line); border:none; }
+
+  /* ---------- Preloader: full-black screen, types the name, then pops away ---------- */
+  #preloader{
+    position:fixed; inset:0; z-index:500; background:#000;
+    display:flex; align-items:center; justify-content:center;
+    transition: opacity .28s ease, transform .28s ease, visibility .28s ease;
+  }
+  #preloader.done{ opacity:0; visibility:hidden; pointer-events:none; }
+  .preloader-name{
+    font-family:var(--serif-display);
+    font-size:clamp(58px, 12vw, 168px);
+    line-height:0.86;
+    letter-spacing:0.005em;
+    color:var(--text);
+    text-align:left;
+    transition: transform .6s cubic-bezier(.2,.7,.2,1);
+    will-change: transform;
+  }
+  .preloader-name .pl-line{ display:block; min-height:1em; }
+  .preloader-name .pl-line.pl-outline{ color:transparent; -webkit-text-stroke:1.5px var(--text); }
+  .preloader-cursor{
+    display:inline-block; width:0.5ch; margin-left:2px; background:var(--green);
+    box-shadow:0 0 12px var(--green-glow);
+    animation: pl-blink .8s steps(1) infinite;
+  }
+  @keyframes pl-blink{ 0%,49%{ opacity:1; } 50%,100%{ opacity:0; } }
+  @media (prefers-reduced-motion: reduce){ .preloader-cursor{ animation:none; opacity:1; } }
 
   /* ---------- Grain overlay ---------- */
   .grain{
@@ -567,13 +595,94 @@
   @media (prefers-reduced-motion: reduce){ .reveal-el{ opacity:1; transform:none; transition:none; } }
 </style>
 </head>
-<body>
+<body class="preloading">
 
 <!--
   LANGUAGE SWITCH: every element with a data-sk="..." attribute has its English text in the tag itself
   and its Slovak text in data-sk. Images use data-sk-alt for the Slovak alt text.
   To change a Slovak translation, just edit the data-sk value.
 -->
+
+<!-- PRELOADER: black screen, types the name, then pops away to reveal the site -->
+<div id="preloader" aria-hidden="true">
+  <div class="preloader-name">
+    <span class="pl-line" id="pl-line1"></span>
+    <span class="pl-line pl-outline" id="pl-line2"></span>
+  </div>
+</div>
+<script>
+(function(){
+  var preloader = document.getElementById('preloader');
+  var reducedPL = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function finishPreload(){
+    document.body.classList.remove('preloading');
+    preloader.classList.add('done');
+    setTimeout(function(){
+      if(preloader && preloader.parentNode){ preloader.parentNode.removeChild(preloader); }
+      if(window.ScrollTrigger){ ScrollTrigger.refresh(); }
+    }, 320);
+  }
+
+  if(reducedPL){
+    document.body.classList.remove('preloading');
+    if(preloader && preloader.parentNode){ preloader.parentNode.removeChild(preloader); }
+  } else {
+    var CHAR_DELAY = 65;   // ms per character — fast keyboard-style typing
+    var LINE_PAUSE = 140;  // ms pause before the next line starts
+    var HOLD_AFTER = 260;  // ms pause after typing finishes, before the reveal
+
+    function typeLine(el, text, cb){
+      var cursor = document.createElement('span');
+      cursor.className = 'preloader-cursor';
+      el.appendChild(cursor);
+      var i = 0;
+      (function step(){
+        if(i < text.length){
+          cursor.insertAdjacentText('beforebegin', text[i]);
+          i++;
+          setTimeout(step, CHAR_DELAY);
+        } else {
+          cursor.remove();
+          setTimeout(cb, LINE_PAUSE);
+        }
+      })();
+    }
+
+    function moveIntoPlaceThenReveal(){
+      var nameBlock = document.querySelector('.preloader-name');
+      var heroName = document.querySelector('h1.name');
+      if(!nameBlock || !heroName){ finishPreload(); return; }
+
+      var fromRect = nameBlock.getBoundingClientRect();
+      var toRect = heroName.getBoundingClientRect();
+      var dx = toRect.left - fromRect.left;
+      var dy = toRect.top - fromRect.top;
+
+      var done = false;
+      function onEnd(e){
+        if(e && e.propertyName !== 'transform') return;
+        if(done) return;
+        done = true;
+        nameBlock.removeEventListener('transitionend', onEnd);
+        finishPreload();
+      }
+      nameBlock.addEventListener('transitionend', onEnd);
+      requestAnimationFrame(function(){
+        nameBlock.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+      });
+      // fallback in case transitionend doesn't fire for any reason
+      setTimeout(function(){ if(!done){ done = true; finishPreload(); } }, 750);
+    }
+
+    typeLine(document.getElementById('pl-line1'), 'DANIEL', function(){
+      typeLine(document.getElementById('pl-line2'), 'ŠTORCEL', function(){
+        setTimeout(moveIntoPlaceThenReveal, HOLD_AFTER);
+      });
+    });
+  }
+})();
+</script>
 
 <div class="grain"></div>
 
@@ -622,7 +731,7 @@
       <div class="hero-tags">
         <span data-sk="Technológie">Technology</span><span>AI</span><span data-sk="Podnikanie">Entrepreneurship</span><span data-sk="Výskum">Research</span><span data-sk="Hory">Mountains</span>
       </div>
-      <a class="cv-btn" href="daniel-storcel-cv-en.pdf" data-href-sk="daniel-storcel-cv-sk.pdf" download="Daniel-Storcel-CV.pdf">
+      <a class="cv-btn" href="daniel-storcel-cv-en.pdf" data-href-sk="daniel-storcel-cv-sk.pdf" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
         <span data-sk="Stiahnuť CV">Download CV</span>
       </a>
@@ -1030,7 +1139,7 @@
         <a href="mailto:danysto08@gmail.com">danysto08@gmail.com</a>
         <a href="https://www.instagram.com/daniel._kooo" target="_blank" rel="noopener">@daniel._kooo</a>
       </div>
-      <a class="cv-btn cv-btn--ghost reveal-el" style="margin:34px auto 0;" href="daniel-storcel-cv-en.pdf" data-href-sk="daniel-storcel-cv-sk.pdf" download="Daniel-Storcel-CV.pdf">
+      <a class="cv-btn cv-btn--ghost reveal-el" style="margin:34px auto 0;" href="daniel-storcel-cv-en.pdf" data-href-sk="daniel-storcel-cv-sk.pdf" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
         <span data-sk="Stiahnuť CV (PDF)">Download CV (PDF)</span>
       </a>
