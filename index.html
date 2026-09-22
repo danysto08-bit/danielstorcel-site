@@ -612,78 +612,17 @@
 </div>
 <script>
 (function(){
-  var preloader = document.getElementById('preloader');
-  var reducedPL = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function finishPreload(){
-    document.body.classList.remove('preloading');
-    preloader.classList.add('done');
-    setTimeout(function(){
-      if(preloader && preloader.parentNode){ preloader.parentNode.removeChild(preloader); }
-      if(window.ScrollTrigger){ ScrollTrigger.refresh(); }
-    }, 320);
-  }
-
-  if(reducedPL){
-    document.body.classList.remove('preloading');
-    if(preloader && preloader.parentNode){ preloader.parentNode.removeChild(preloader); }
-  } else {
-    var CHAR_DELAY = 65;   // ms per character — fast keyboard-style typing
-    var LINE_PAUSE = 140;  // ms pause before the next line starts
-    var HOLD_AFTER = 260;  // ms pause after typing finishes, before the reveal
-
-    function typeLine(el, text, cb){
-      var cursor = document.createElement('span');
-      cursor.className = 'preloader-cursor';
-      el.appendChild(cursor);
-      var i = 0;
-      (function step(){
-        if(i < text.length){
-          cursor.insertAdjacentText('beforebegin', text[i]);
-          i++;
-          setTimeout(step, CHAR_DELAY);
-        } else {
-          cursor.remove();
-          setTimeout(cb, LINE_PAUSE);
-        }
-      })();
-    }
-
-    function moveIntoPlaceThenReveal(){
-      var nameBlock = document.querySelector('.preloader-name');
-      var heroName = document.querySelector('h1.name');
-      if(!nameBlock || !heroName){ finishPreload(); return; }
-
-      var fromRect = nameBlock.getBoundingClientRect();
-      var toRect = heroName.getBoundingClientRect();
-      var dx = toRect.left - fromRect.left;
-      var dy = toRect.top - fromRect.top;
-
-      var done = false;
-      function onEnd(e){
-        if(e && e.propertyName !== 'transform') return;
-        if(done) return;
-        done = true;
-        nameBlock.removeEventListener('transitionend', onEnd);
-        finishPreload();
-      }
-      nameBlock.addEventListener('transitionend', onEnd);
-      requestAnimationFrame(function(){
-        nameBlock.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
-      });
-      // fallback in case transitionend doesn't fire for any reason
-      setTimeout(function(){ if(!done){ done = true; finishPreload(); } }, 750);
-    }
-
-    typeLine(document.getElementById('pl-line1'), 'DANIEL', function(){
-      typeLine(document.getElementById('pl-line2'), 'ŠTORCEL', function(){
-        setTimeout(moveIntoPlaceThenReveal, HOLD_AFTER);
-      });
-    });
-  }
+  var preloader=document.getElementById('preloader');
+  var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.head.insertAdjacentHTML('beforeend','<style>#preloader{transition:opacity .45s cubic-bezier(.22,1,.36,1),visibility .45s step-end}.preloader-name{transform-origin:left top;transition:transform .45s cubic-bezier(.22,1,.36,1)}.preloader-name .pl-line{white-space:pre}.preloader-cursor{display:inline-block;width:.075em;height:.78em;margin-left:.06em;vertical-align:-.04em;background:var(--green);border-radius:1px;box-shadow:0 0 14px var(--green-glow);animation:pl-blink 1s step-end infinite}.typed-character{display:inline-block;animation:char-in .28s cubic-bezier(.22,1,.36,1) both}@keyframes char-in{from{opacity:0;transform:translateY(.13em)}to{opacity:1;transform:translateY(0)}}@keyframes pl-blink{0%,46%{opacity:1}47%,100%{opacity:0}}</style>');
+  function finish(){document.body.classList.remove('preloading');preloader.classList.add('done');setTimeout(function(){if(preloader.parentNode)preloader.parentNode.removeChild(preloader);if(window.ScrollTrigger)ScrollTrigger.refresh()},700)}
+  if(reduced){document.body.classList.remove('preloading');preloader.remove();return}
+  var cursor=document.createElement('span');cursor.className='preloader-cursor';
+  function type(el,word,done){el.appendChild(cursor);var i=0;(function step(){if(i<word.length){var c=document.createElement('span');c.className='typed-character';c.textContent=word[i++];el.insertBefore(c,cursor);setTimeout(step,125+Math.round((Math.random()-.5)*42))}else setTimeout(done,360)})()}
+  function reveal(){var from=document.querySelector('.preloader-name'),to=document.querySelector('h1.name');if(!from||!to){finish();return}var r1=from.getBoundingClientRect(),r2=to.getBoundingClientRect(),done=false;from.addEventListener('transitionend',function(e){if(!done&&e.propertyName==='transform'){done=true;finish()}});requestAnimationFrame(function(){from.style.transform='translate('+(r2.left-r1.left)+'px,'+(r2.top-r1.top)+'px)'});setTimeout(function(){if(!done){done=true;finish()}},600)}
+  type(document.getElementById('pl-line1'),'DANIEL',function(){type(document.getElementById('pl-line2'),'ŠTORCEL',function(){setTimeout(reveal,900)})});
 })();
 </script>
-
 <div class="grain"></div>
 
 <header id="siteHeader">
