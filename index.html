@@ -590,6 +590,27 @@
 
   footer{ border-top:1px solid var(--line); padding:28px clamp(20px,5vw,64px); display:flex; justify-content:space-between; font-family:var(--mono); font-size:11px; color:var(--text-faint); flex-wrap:wrap; gap:10px; }
 
+  /* ---------- Final contact screen: normal scrolling, never pinned ---------- */
+  .contact{ min-height:100svh; background:#000; display:grid; place-items:center; position:relative; padding:clamp(28px,6vw,80px); }
+  .contact .wrap{ max-width:920px; text-align:center; }
+  .contact .index{ display:none !important; }
+  .contact h2{ min-height:1.8em; font-size:clamp(48px,9vw,128px); }
+  .contact-cursor{ display:none; width:.07em; height:.78em; margin-left:.08em; vertical-align:-.04em; background:var(--green); box-shadow:0 0 18px var(--green-glow); animation:pl-blink 1s step-end infinite; }
+  .contact.is-active .contact-cursor{ display:inline-block; }
+  .contact .contact-links{ justify-content:center; gap:12px; margin-top:42px; }
+  .contact .contact-links a, .contact .cv-btn{ opacity:0; transform:translateY(14px); font-family:var(--mono); border:1px solid var(--green); border-radius:100px; padding:13px 18px; box-shadow:0 0 0 1px rgba(184,255,61,.14), 0 0 24px var(--green-glow); transition:opacity .45s ease, transform .45s cubic-bezier(.22,1,.36,1), background .25s ease, color .25s ease, box-shadow .25s ease; }
+  .contact.outro-links-visible .contact-links a, .contact.outro-links-visible .cv-btn{ opacity:1; transform:translateY(0); }
+  .contact.outro-links-visible .contact-links a:nth-child(2){ transition-delay:.12s; }
+  .contact.outro-links-visible .cv-btn{ transition-delay:.24s; }
+  .contact .contact-links a:hover, .contact .contact-links a:focus-visible, .contact .cv-btn:hover, .contact .cv-btn:focus-visible{ background:var(--green); color:#000; box-shadow:0 0 34px rgba(184,255,61,.42); }
+  .return-scroll{ position:absolute; bottom:32px; left:50%; opacity:0; transform:translate(-50%,8px); font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--text-faint); white-space:nowrap; pointer-events:none; animation:return-hint 1.8s ease-in-out infinite; transition:opacity .4s ease .55s, transform .4s cubic-bezier(.22,1,.36,1) .55s; }
+  .contact.outro-links-visible .return-scroll{ opacity:1; transform:translate(-50%,0); }
+  @keyframes return-hint{ 50%{ transform:translate(-50%,-6px); color:var(--green); } }
+  body.outro-active #siteHeader, body.outro-active .grain{ opacity:0; pointer-events:none; }
+  #siteHeader, .grain{ transition:opacity .35s ease; }
+  footer{ display:none; }
+  @media (prefers-reduced-motion: reduce){ .contact .contact-links a, .contact .cv-btn{ transition:none; } .return-scroll{ animation:none; } }
+
   .reveal-el{ opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease; }
   .reveal-el.in{ opacity:1; transform:translateY(0); }
   @media (prefers-reduced-motion: reduce){ .reveal-el{ opacity:1; transform:none; transition:none; } }
@@ -620,7 +641,7 @@
   var cursor=document.createElement('span');cursor.className='preloader-cursor';
   function type(el,word,done){el.appendChild(cursor);var i=0;(function step(){if(i<word.length){var c=document.createElement('span');c.className='typed-character';c.textContent=word[i++];el.insertBefore(c,cursor);setTimeout(step,125+Math.round((Math.random()-.5)*42))}else setTimeout(done,360)})()}
   function reveal(){var from=document.querySelector('.preloader-name'),to=document.querySelector('h1.name');if(!from||!to){finish();return}var r1=from.getBoundingClientRect(),r2=to.getBoundingClientRect(),done=false;from.addEventListener('transitionend',function(e){if(!done&&e.propertyName==='transform'){done=true;finish()}});requestAnimationFrame(function(){from.style.transform='translate('+(r2.left-r1.left)+'px,'+(r2.top-r1.top)+'px)'});setTimeout(function(){if(!done){done=true;finish()}},600)}
-  type(document.getElementById('pl-line1'),'DANIEL',function(){type(document.getElementById('pl-line2'),'ŠTORCEL',function(){setTimeout(reveal,900)})});
+  type(document.getElementById('pl-line1'),'DANIEL',function(){type(document.getElementById('pl-line2'),'ŠTORCEL',function(){setTimeout(reveal,400)})});
 })();
 </script>
 <div class="grain"></div>
@@ -1072,17 +1093,18 @@
   <!-- CONTACT -->
   <section class="contact" id="contact">
     <div class="wrap">
-      <span class="index reveal-el" style="display:block; margin-bottom:18px;">// 08</span>
-      <h2 class="reveal-el" data-sk="Poďme postaviť<br>niečo zaujímavé.">Let's build<br>something interesting.</h2>
-      <div class="contact-links reveal-el">
+      <span class="index" style="display:block; margin-bottom:18px;">// 08</span>
+      <h2><span id="contactTyped" data-text-en="LET'S BUILD&#10;SOMETHING INTERESTING." data-text-sk="POĎME POSTAVIŤ&#10;NIEČO ZAUJÍMAVÉ."></span><span class="contact-cursor" aria-hidden="true"></span></h2>
+      <div class="contact-links">
         <a href="mailto:danysto08@gmail.com">danysto08@gmail.com</a>
         <a href="https://www.instagram.com/daniel._kooo" target="_blank" rel="noopener">@daniel._kooo</a>
       </div>
-      <a class="cv-btn cv-btn--ghost reveal-el" style="margin:34px auto 0;" href="daniel-storcel-cv-en.pdf" data-href-sk="daniel-storcel-cv-sk.pdf" target="_blank" rel="noopener">
+      <a class="cv-btn cv-btn--ghost" style="margin:34px auto 0;" href="daniel-storcel-cv-en.pdf" data-href-sk="daniel-storcel-cv-sk.pdf" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
         <span data-sk="Stiahnuť CV (PDF)">Download CV (PDF)</span>
       </a>
     </div>
+    <p class="return-scroll">↑ <span data-sk="SCROLLUJ SPÄŤ HORE">SCROLL TO RETURN</span></p>
   </section>
 
 </main>
@@ -1097,6 +1119,57 @@
 <script>
 (function(){
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // The final contact section is not pinned, so scrolling back always works.
+  var finalContact = document.getElementById('contact');
+  var contactTyped = document.getElementById('contactTyped');
+  var returnTimer;
+  function startContactTyping(){
+    if(!finalContact) return;
+    document.body.classList.add('outro-active');
+    if(finalContact.classList.contains('is-active')) return;
+    finalContact.classList.add('is-active');
+    var text = document.documentElement.lang === 'sk' ? contactTyped.getAttribute('data-text-sk') : contactTyped.getAttribute('data-text-en');
+    var i = 0;
+    (function type(){
+      if(i < text.length){
+        contactTyped.innerHTML += text[i] === '\n' ? '<br>' : text[i];
+        i++;
+        returnTimer = setTimeout(type, reduced ? 0 : 70);
+      } else {
+        finalContact.classList.add('outro-links-visible');
+      }
+    })();
+  }
+  if(finalContact){
+    var contactObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          document.body.classList.add('outro-active');
+          if(entry.intersectionRatio > .5){ startContactTyping(); }
+        } else { document.body.classList.remove('outro-active'); }
+      });
+    }, { threshold:[0,.55] });
+    contactObserver.observe(finalContact);
+  }
+
+  // Once the reader has returned to roughly 75% of section 07, reset the ending.
+  // A later scroll back down will play the typed contact screen from the beginning.
+  var experienceSection = document.getElementById('experience');
+  function resetFinalContact(){
+    if(!finalContact || !finalContact.classList.contains('is-active')) return;
+    clearTimeout(returnTimer);
+    finalContact.classList.remove('is-active', 'outro-links-visible');
+    contactTyped.innerHTML = '';
+    document.body.classList.remove('outro-active');
+  }
+  window.addEventListener('scroll', function(){
+    if(!experienceSection || !finalContact || !finalContact.classList.contains('is-active')) return;
+    var rect = experienceSection.getBoundingClientRect();
+    var viewportPoint = window.innerHeight * .5;
+    var sectionProgress = (viewportPoint - rect.top) / rect.height;
+    if(sectionProgress >= .68 && sectionProgress <= .78){ resetFinalContact(); }
+  }, { passive:true });
 
   // Header background on scroll
   var header = document.getElementById('siteHeader');
