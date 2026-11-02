@@ -1,0 +1,45 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { content } from '../content/site';
+---
+<Layout lang="en" c={content.en}>
+  <main id="main" class="nf">
+    <span class="mono nf-idx">404</span>
+    <h1 class="nf-title">Not here. <em>Nie tu.</em></h1>
+    <p class="nf-links">
+      <a href="/">← Home</a>
+      <a href="/sk/">← Domov</a>
+    </p>
+  </main>
+</Layout>
+
+<style>
+  .nf {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--gutter);
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+  .nf-idx { color: var(--accent); }
+  .nf-title {
+    font-family: var(--font-display), serif;
+    font-weight: 400;
+    font-size: clamp(56px, 12vw, 180px);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    margin-top: 18px;
+  }
+  .nf-title em { font-style: italic; color: var(--accent); font-size: 0.5em; }
+  .nf-links { margin-top: 40px; display: flex; gap: 28px; }
+  .nf-links a {
+    font-family: var(--font-mono), monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-underline-offset: 5px;
+  }
+</style>

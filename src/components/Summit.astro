@@ -1,0 +1,404 @@
+---
+import { Picture } from 'astro:assets';
+import type { SiteContent } from '../content/site';
+import mTraunstein from '../assets/mountain-traunstein.jpg';
+import mSummit from '../assets/mountain-summit.jpg';
+import mLake from '../assets/mountain-lake.jpg';
+import mView from '../assets/mountain-view.jpg';
+import dem from '../assets/dem/dem.json';
+interface Props { c: SiteContent }
+const { c } = Astro.props;
+const photos = [mTraunstein, mSummit, mLake, mView];
+---
+<section id="summit" data-theme="deep" class="summit">
+  <div class="summit-stage">
+    <div class="stage-sky" aria-hidden="true"></div>
+    <div class="stage-context">
+      <span class="mono index">{c.sections.summit.index}</span>
+      <h2 class="stage-context-title">MONT <em>BLANC</em></h2>
+      <p class="stage-context-sub">{c.summit.sub}</p>
+    </div>
+    <div class="stage-left">
+      <div class="profile-wrap">
+        <canvas id="terrainCanvas" aria-hidden="true"></canvas>
+        <svg id="ridgeSvg" viewBox="0 0 900 420" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+          <path id="ridgeBack" d="M 0 380 L 60 374 L 115 382 L 175 344 L 230 356 L 290 332 L 350 348 L 415 315 L 475 326 L 535 296 L 595 306 L 655 272 L 715 280 L 770 240 L 825 246 L 870 205 L 900 200" />
+          <path id="ridgeMain" d="M 0 365 L 55 352 L 108 368 L 162 318 L 216 335 L 270 308 L 324 328 L 378 288 L 432 304 L 486 268 L 540 282 L 594 238 L 648 256 L 702 208 L 756 224 L 801 170 L 837 116 L 864 82 L 900 108" />
+        </svg>
+        {c.summit.peaks.map((pk, i) => (
+          <div class="peak-node" data-i={i}>
+            <span class="pk-label mono">
+              <span class="pk-name">{pk.name}</span>
+              <span class="pk-meta">{pk.alt} · {pk.tag}</span>
+              <span class:list={['pk-status', i === 2 && 'goal']}>{i === 2 ? pk.status : `✓ ${pk.status}`}</span>
+            </span>
+            <span class:list={['pk-dot', i === 2 ? 'goal' : 'done']}></span>
+          </div>
+        ))}
+        <svg class="summit-tether" aria-hidden="true"><line /><circle r="2" /></svg>
+        {c.summit.route.points.slice(0, 5).map((label, i) => (
+          <span class="hut-label mono" data-i={i}>{label} · {dem[2].route![i].known} m</span>
+        ))}
+      </div>
+      <div class="altitude summit-hud">
+        <div class="alt-main"><span class="alt-num" id="altReadout">0</span><span class="alt-unit">&nbsp;m</span><span class="alt-label mono">{c.summit.ascentLabel}</span></div>
+        <div class="hud-details">
+          {c.summit.peaks.map((pk, i) => (
+            <div class="hud-chapter mono" data-i={i} data-active={i === 0 ? '' : undefined}>
+              <span>{c.summit.hud.peak} {i + 1} / 3 — {pk.name}</span>
+              <span>{pk.coords}</span>
+              <span class:list={['hud-status', i === 2 && 'goal']}>{i === 2 ? c.summit.hud.goal : `✓ ${c.summit.hud.climbed}`}</span>
+            </div>
+          ))}
+          <span class="hud-route mono">{c.summit.route.label}</span>
+        </div>
+      </div>
+      <ul class="peak-legend mono">
+        {c.summit.peaks.map((pk, i) => (
+          <li>
+            <span class:list={['pk-dot', i === 2 ? 'goal' : 'done']}></span>
+            <span>{pk.name} — {pk.alt} — {pk.tag} <span class:list={['legend-status', i === 2 && 'goal']}>{i === 2 ? pk.status : `✓ ${pk.status}`}</span></span>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div class="stage-right">
+      <div class="photo-stack">
+        {photos.map((p, i) => (
+          <figure class="stack-photo photo-frame" data-i={i} data-active={i === 0 ? 'true' : undefined}>
+            <Picture src={p} alt={c.summit.photoAlts[i]} formats={['avif', 'webp']} widths={[500, 900]} sizes="(min-width: 1024px) 24vw, 70vw" loading="lazy" data-velocity-skew />
+            <figcaption class="mono">{c.summit.photoCaptions[i]}</figcaption>
+          </figure>
+        ))}
+        <figure class="stack-empty photo-frame" data-i="4">
+          <span>{c.summit.emptyFrame.title}</span>
+          <figcaption class="mono">{c.summit.emptyFrame.note}</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap summit-tail">
+    <div class="stat-row">
+      {c.summit.stats.map((s) => (
+        <div class="stat-cell">
+          <div class="stat-num" data-value={s.value}>0:00</div>
+          <div class="stat-label mono">{s.label}</div>
+        </div>
+      ))}
+    </div>
+    <div class="prep-list">
+      {c.summit.prep.map((p, i) => (
+        <div class="prep-row">
+          <span class="mono prep-idx">{String(i + 1).padStart(2, '0')}</span>
+          <span>{p}</span>
+        </div>
+      ))}
+    </div>
+    <p class="partners" set:html={c.summit.partners} />
+    <p class="summit-credit mono">{c.summit.credit}</p>
+  </div>
+</section>
+
+<style>
+  .summit { padding-block: clamp(96px, 14vw, 200px) 0; }
+  .summit-stage {
+    display: grid;
+    grid-template-columns: 6fr 4fr;
+    gap: clamp(32px, 5vw, 80px);
+    min-height: 100svh;
+    align-items: center;
+    padding: clamp(48px, 7vw, 96px) var(--gutter);
+    max-width: 1440px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+  }
+  .stage-context {
+    position: absolute;
+    top: clamp(48px, 8vh, 96px);
+    left: var(--gutter);
+    right: var(--gutter);
+    text-align: center;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .stage-context .index { color: var(--accent); display: block; margin-bottom: 10px; }
+  .stage-context-title {
+    font-family: var(--font-display), serif;
+    font-weight: 400;
+    font-size: var(--display-l);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .stage-context-title em { font-style: italic; color: var(--accent); }
+  .stage-context-sub {
+    max-width: 46ch;
+    margin: 14px auto 0;
+    color: var(--fg-dim);
+    font-size: clamp(14px, 1.1vw, 16px);
+    line-height: 1.55;
+  }
+  .profile-wrap { position: relative; }
+  #terrainCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+  }
+  .summit.has-3d #terrainCanvas { display: block; }
+  .summit.has-3d #ridgeSvg { display: none; }
+  #ridgeSvg { width: 100%; height: auto; display: block; overflow: visible; }
+  #ridgeMain, #ridgeBack {
+    fill: none;
+    stroke-width: 1.5;
+    stroke: var(--fg);
+  }
+  #ridgeBack { opacity: 0.35; }
+  .peak-node {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    left: 0; top: 0;
+    margin-top: -14px;
+  }
+  .peak-node.edge { transform: translate(-92%, -100%); align-items: flex-end; }
+  .pk-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--paper);
+    flex: 0 0 auto;
+  }
+  .pk-dot.goal {
+    background: transparent;
+    border: 1.5px dashed var(--accent);
+    width: 14px; height: 14px;
+  }
+  .pk-label {
+    color: var(--fg-dim);
+    text-align: center;
+    line-height: 1.5;
+  }
+  .peak-node.edge .pk-label { text-align: right; }
+  .pk-name, .pk-meta { display: block; white-space: nowrap; }
+  .peak-legend { display: none; }
+  .altitude {
+    margin-top: clamp(28px, 4vw, 56px);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .alt-num {
+    font-family: var(--font-display), serif;
+    font-size: clamp(56px, 7vw, 110px);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .alt-unit { font-family: var(--font-display), serif; font-size: clamp(28px, 3vw, 48px); color: var(--fg-dim); }
+  .alt-label { margin-left: 18px; color: var(--accent); }
+  .stage-right { position: relative; }
+  .photo-stack { position: relative; aspect-ratio: 3/4; }
+  .stack-photo {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    opacity: 0.35;
+    transform: translate(40px, 40px) scale(0.94);
+    transition: transform 0.7s var(--ease-out), opacity 0.7s var(--ease-out);
+  }
+  .stack-photo[data-active] { opacity: 1; transform: none; z-index: 2; }
+  .stack-photo :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .stack-photo figcaption {
+    position: absolute;
+    left: 12px; bottom: 10px;
+    background: rgba(5,5,6,.7);
+    color: var(--text-dim);
+    padding: 5px 10px;
+  }
+  .scroll-hint { display: block; margin-top: 16px; color: var(--fg-faint); text-align: center; }
+  .summit-tail { padding-bottom: clamp(96px, 14vw, 200px); }
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--line-c);
+    border-bottom: 1px solid var(--line-c);
+    margin-bottom: clamp(56px, 8vw, 100px);
+  }
+  .stat-cell { padding: clamp(28px, 4vw, 52px) 0; text-align: center; }
+  .stat-cell + .stat-cell { border-left: 1px solid var(--line-c); }
+  .stat-num {
+    font-family: var(--font-display), serif;
+    font-size: clamp(48px, 6vw, 88px);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .stat-label { margin-top: 12px; color: var(--fg-faint); }
+  .prep-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: clamp(56px, 8vw, 100px);
+  }
+  .prep-row {
+    display: flex;
+    gap: 16px;
+    align-items: baseline;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line-c);
+    font-size: clamp(15px, 1.3vw, 17px);
+  }
+  .prep-idx { color: var(--accent); }
+  .partners {
+    text-align: center;
+    color: var(--fg-dim);
+    max-width: 60ch;
+    margin: 0 auto;
+    line-height: 1.65;
+  }
+  .partners :global(b) { font-weight: 500; color: var(--fg); }
+  .summit-credit { margin-top: 32px; text-align: center; color: var(--fg-faint); }
+
+  /* reduced-motion / static layout: normal flow, no overlap */
+  .summit-stage.static-stage {
+    min-height: 0;
+    height: auto;
+    padding-top: 0;
+    align-items: start;
+  }
+  .static-stage .stage-context {
+    position: static;
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+    padding-bottom: 48px;
+    pointer-events: auto;
+  }
+  .static-stage .profile-wrap {
+    position: relative;
+    height: 60vh;
+  }
+  @media (max-width: 1023px) {
+    .static-stage .profile-wrap { height: 52vh; }
+    .static-stage .stage-context { padding-bottom: 0; }
+  }
+
+  @media (max-width: 1023px) {
+    .summit-stage { grid-template-columns: 1fr; min-height: 0; padding-top: 24px; }
+    .stage-context {
+      position: static;
+      text-align: center;
+      margin-bottom: 40px;
+      pointer-events: auto;
+    }
+    .peak-node { display: none; }
+    .peak-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      list-style: none;
+      margin-top: 20px;
+      color: var(--fg-dim);
+    }
+    .peak-legend li { display: flex; align-items: center; gap: 10px; }
+    .photo-stack {
+      display: flex;
+      gap: 14px;
+      aspect-ratio: auto;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 8px;
+    }
+    .stack-photo {
+      position: relative;
+      inset: auto;
+      flex: 0 0 68%;
+      aspect-ratio: 3/4;
+      opacity: 1;
+      transform: none;
+      scroll-snap-align: center;
+    }
+    .scroll-hint { display: none; }
+    .stat-row { grid-template-columns: 1fr; }
+    .stat-cell + .stat-cell { border-left: none; border-top: 1px solid var(--line-c); }
+    .prep-list { grid-template-columns: 1fr; }
+  }
+
+  .summit-stage { display: block; }
+  .stage-sky {
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(120% 55% at 70% 100%, rgba(255,79,31,.28), rgba(255,140,90,.08) 40%, transparent 70%);
+    opacity: var(--sky-glow, 0);
+  }
+  .stage-left { display: contents; }
+  .profile-wrap { position: absolute; inset: 0; z-index: 1; }
+  #ridgeSvg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .peak-node { z-index: 3; gap: 0; }
+  .pk-label::after { content: ''; display: block; width: 1px; height: 28px; margin: 5px auto; background: var(--line-c); }
+  .peak-node.edge .pk-label::after { margin-right: 4px; }
+  .pk-status { display: block; color: var(--fg); }
+  .pk-status.goal, .hud-status.goal, .legend-status.goal { color: var(--accent); }
+  .summit-tether { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; visibility: hidden; }
+  .summit-tether line { stroke: var(--fg); stroke-width: 1; opacity: .45; }
+  .summit-tether circle { fill: var(--fg); }
+  .summit-tether.goal line { stroke: var(--accent); stroke-dasharray: 4 4; }
+  .summit-tether.goal circle { fill: var(--accent); }
+  .hut-label { position: absolute; z-index: 3; pointer-events: none; color: var(--fg); white-space: nowrap; font-size: 10px; visibility: hidden; opacity: 0; transition: opacity .35s; transform: translate(10px, -50%); }
+  .hut-label.edge { transform: translate(calc(-100% - 10px), -50%); }
+  .altitude { position: absolute; left: var(--gutter); bottom: clamp(32px, 6vh, 64px); z-index: 4; margin: 0; display: block; border-top: 1px solid var(--line-c); padding-top: 12px; min-width: 270px; }
+  .summit-hud::before { content: ''; position: absolute; inset: -48px -80px -32px -48px; background: radial-gradient(ellipse at 30% 70%, rgba(5,5,6,.92), rgba(5,5,6,.6) 45%, transparent 72%); z-index: -1; pointer-events: none; }
+  .alt-main { display: flex; align-items: baseline; gap: 6px; }
+  .hud-chapter { display: none; color: var(--fg-dim); line-height: 1.8; }
+  .hud-chapter[data-active] { display: grid; }
+  .hud-status, .legend-status { color: var(--fg); }
+  .hud-route { display: block; color: var(--accent); opacity: 0; margin-top: 5px; }
+  .stage-right { position: absolute; z-index: 4; right: var(--gutter); top: clamp(72px, 12vh, 120px); width: clamp(190px, 17vw, 260px); }
+  .photo-stack { position: relative; width: 100%; aspect-ratio: 3/4; overflow: visible; }
+  .stack-photo, .stack-empty { position: absolute; inset: 0; overflow: hidden; opacity: .85; transform: translate(-6px, 6px) rotate(-3deg); }
+  .stack-photo[data-i="2"] { transform: translate(6px, 6px) rotate(3deg); }
+  .stack-photo[data-i="3"] { transform: translate(-6px, 6px) rotate(-3deg); }
+  .stack-photo[data-active] { opacity: 1; transform: none; z-index: 3; }
+  .stack-photo:not([data-active]) figcaption { display: none; }
+  .photo-stack[data-chapter="0"] .stack-photo:not([data-i="0"]),
+  .photo-stack[data-chapter="1"] .stack-photo[data-i="0"],
+  .photo-stack[data-chapter="2"] .stack-photo,
+  .photo-stack:not([data-chapter="2"]) .stack-empty { display: none; }
+  .stack-empty { border: 1px dashed var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; opacity: 1; transform: none; text-align: center; }
+  .stack-empty > span { font-family: var(--font-display), serif; font-size: clamp(30px, 3vw, 44px); }
+  .stack-empty figcaption { position: static; color: var(--fg-dim); }
+  .summit-stage.static-stage { display: flex; flex-direction: column; align-items: stretch; gap: 24px; }
+  .static-stage .stage-context { position: static; padding-bottom: 0; }
+  .static-stage .profile-wrap { position: relative; inset: auto; grid-column: 1 / -1; width: 100%; max-width: none; max-height: 70vh; height: auto; aspect-ratio: 2 / 1; border: 1px solid var(--line-c); }
+  .static-stage .altitude { position: relative; left: auto; bottom: auto; }
+  .static-stage .peak-legend { display: flex; flex-direction: column; gap: 10px; list-style: none; margin: 0; color: var(--fg-dim); }
+  .static-stage .peak-legend li { display: flex; align-items: center; gap: 10px; }
+  .static-stage .stage-right { position: static; width: 100%; }
+  .static-stage .peak-node, .static-stage .summit-tether { display: none; }
+  .static-stage .hut-label { display: block; }
+  .static-stage .photo-stack { display: flex; gap: 14px; width: 100%; aspect-ratio: auto; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 0 8px; }
+  .static-stage .photo-stack[data-chapter] .stack-photo, .static-stage .photo-stack[data-chapter] .stack-empty { display: block; position: relative; inset: auto; flex: 0 0 calc((100% - 56px) / 5); aspect-ratio: 3 / 4; opacity: 1; transform: none; scroll-snap-align: center; }
+  .static-stage .photo-stack[data-chapter] .stack-empty { display: flex; }
+  .static-stage .photo-stack[data-chapter] .stack-photo figcaption { display: block; }
+  @media (max-width: 1023px) {
+    .summit-stage { display: flex; flex-direction: column; align-items: stretch; gap: 24px; }
+    .stage-context { margin: 0; }
+    .profile-wrap { position: relative; inset: auto; width: 100%; height: auto; aspect-ratio: 4 / 3; border: 1px solid var(--line-c); }
+    .altitude { position: relative; left: auto; bottom: auto; min-width: 0; }
+    .peak-legend { margin: 0; }
+    .legend-status { display: block; }
+    .stage-right { position: static; width: 100%; }
+    .photo-stack { display: flex; gap: 14px; width: 100%; aspect-ratio: auto; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 0 8px; }
+    .photo-stack[data-chapter] .stack-photo, .photo-stack[data-chapter] .stack-empty { display: flex; position: relative; inset: auto; flex: 0 0 68%; aspect-ratio: 3 / 4; opacity: 1; transform: none; scroll-snap-align: center; }
+    .photo-stack[data-chapter] .stack-photo { display: block; }
+    .photo-stack[data-chapter] .stack-photo figcaption { display: block; }
+    .peak-node, .summit-tether, .hut-label { display: none; }
+    .static-stage .stage-right { width: 100%; }
+    .static-stage .photo-stack[data-chapter] .stack-photo, .static-stage .photo-stack[data-chapter] .stack-empty { flex-basis: 68%; }
+    .static-stage .photo-stack[data-chapter="2"] .stack-photo { display: block; }
+  }
+</style>

@@ -1,0 +1,67 @@
+---
+import { Font } from 'astro:assets';
+import type { SiteContent } from '../content/site';
+import '../styles/global.css';
+
+interface Props {
+  lang: 'en' | 'sk';
+  c: SiteContent;
+}
+const { lang, c } = Astro.props;
+const base = Astro.site ?? new URL('https://danielstorcel.vercel.app');
+const enUrl = new URL('/', base).href;
+const skUrl = new URL('/sk/', base).href;
+const canonical = new URL(Astro.url.pathname, base).href;
+---
+<!doctype html>
+<html lang={c.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{c.title}</title>
+    <meta name="description" content={c.description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="sk" href={skUrl} />
+    <link rel="alternate" hreflang="x-default" href={enUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={c.title} />
+    <meta property="og:description" content={c.description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL('/og.jpg', base).href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#0c0c0d" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <Font cssVariable="--font-display" preload />
+    <Font cssVariable="--font-sans" preload />
+    <Font cssVariable="--font-mono" />
+    <script is:inline>document.documentElement.classList.add('js')</script>
+    <noscript>
+      <style>
+        .mask-line > span { transform: none !important; }
+        .hero-photo-frame, .about-photo { clip-path: none !important; }
+        #preloader { display: none !important; }
+        .scope .draw { stroke-dashoffset: 0 !important; }
+        .scope .svg-label, .scope .leader, .xsec .svg-label, .xsec .leader, #scaleBar { opacity: 1 !important; }
+        .xsec, #beamE, #beamI, #impact, #tiltArc { opacity: 1 !important; }
+        #spray line { opacity: 1 !important; }
+        #research .research-pin { grid-template-columns: 1fr !important; min-height: 0 !important; }
+        #research .stage-canvas { display: grid !important; grid-template-columns: 1fr 1fr; gap: 32px; width: 100% !important; max-width: 1100px !important; height: auto !important; aspect-ratio: auto !important; }
+        #research .scope, #research .xsec { position: relative !important; inset: auto !important; width: 100% !important; height: auto !important; aspect-ratio: 5 / 6; }
+        #trenchClipRect { height: 120px !important; }
+        #trenchOpen { opacity: 1 !important; }
+        #research .process-line { transform: none !important; }
+        @media (max-width: 700px) { #research .stage-canvas { grid-template-columns: 1fr; } }
+      </style>
+    </noscript>
+  </head>
+  <body data-lang={lang}>
+    <div id="scrollProgress" aria-hidden="true"></div>
+    <div id="themeScan" aria-hidden="true"></div>
+    <a href="#main" class="skip-link">{lang === 'sk' ? 'Preskočiť na obsah' : 'Skip to content'}</a>
+    <div class="grain" aria-hidden="true"></div>
+    <slot />
+  </body>
+</html>

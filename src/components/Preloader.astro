@@ -1,0 +1,52 @@
+---
+interface Props { name: string }
+const { name } = Astro.props;
+const [first, last] = name.split(' ');
+---
+<div id="preloader" aria-hidden="true">
+  <div class="pl-panel top"></div>
+  <div class="pl-panel bottom"></div>
+  <div class="pl-name" aria-hidden="true">
+    <span class="pl-mask"><span class="pl-word">{first}</span></span>
+    <span class="pl-mask"><span class="pl-word pl-italic">{last}</span></span>
+    <span class="pl-rule"></span>
+  </div>
+  <span class="pl-count mono">000</span>
+</div>
+
+<style>
+  #preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    color: var(--text);
+    display: flex;
+    align-items: flex-end;
+    padding: var(--gutter);
+  }
+  .pl-panel { position: absolute; left: 0; right: 0; background: var(--ink); }
+  .pl-panel.top { top: 0; height: var(--split, 50%); }
+  .pl-panel.bottom { top: var(--split, 50%); bottom: 0; }
+  .pl-name {
+    position: relative;
+    font-family: var(--font-display), serif;
+    font-size: clamp(56px, 12vw, 180px);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+  }
+  .pl-mask { display: block; overflow: hidden; }
+  .pl-word { display: block; }
+  .pl-italic { font-style: italic; color: var(--accent); }
+  .pl-rule { display: block; height: 1px; margin-top: 16px; background: var(--accent); transform: scaleX(0); transform-origin: left; }
+  .pl-count {
+    position: absolute;
+    right: var(--gutter);
+    bottom: var(--gutter);
+    font-size: 13px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #preloader { display: none; }
+  }
+</style>

@@ -1,0 +1,149 @@
+---
+import type { SiteContent } from '../content/site';
+import GhostIndex from './GhostIndex.astro';
+
+interface Props { c: SiteContent }
+const { c } = Astro.props;
+const { skills } = c;
+const words = skills.groups.flatMap((group) => group.items.map((word) => ({ word, group: group.id })));
+if (words.length !== 100) throw new Error(`Skills must contain exactly 100 items, got ${words.length}`);
+const hash = (n: number) => {
+  const value = Math.sin(n * 127.1 + 311.7) * 43758.5453123;
+  return value - Math.floor(value);
+};
+---
+<section id="skills" data-theme="graphite" class="skills section-grid">
+  <GhostIndex value="06" />
+  <div class="skills-fallback wrap">
+    <div class="sec-head">
+      <span class="mono index">{c.sections.skills.index}</span>
+      <span class="mono">— {c.sections.skills.title}</span>
+    </div>
+    <h2 class="skills-title" data-reveal-lines><span class="mask-line"><span>{c.sections.skills.title}</span></span></h2>
+    <p class="skills-sub">{skills.sub}</p>
+  </div>
+  <div class="skills-stage">
+    <canvas class="skills-monogram-guide" aria-hidden="true"></canvas>
+    <div class="skills-world" aria-hidden="true">
+      <div class="skills-floor"></div>
+      {Array.from({ length: 80 }, (_, i) => <span class="skills-dust" data-i={i}></span>)}
+      {skills.groups.map((group, i) => <span class="skills-ghost" data-i={skills.groups.slice(0, i).reduce((total, previous) => total + previous.items.length, 0)}>{group.label}</span>)}
+      {words.map(({ word, group }, i) => (
+        <span class:list={['skills-word', hash(i + 1000) < .3 && 'is-italic']} data-i={i} data-group={group} style={`--word-size:${(.85 + hash(i + 2000) * .4).toFixed(3)}`}><span class="skills-word-text">{word}</span></span>
+      ))}
+    </div>
+    <div class="skills-header wrap">
+      <div class="sec-head">
+        <span class="mono index">{c.sections.skills.index}</span>
+        <span class="mono">— {c.sections.skills.title}</span>
+        <span class="skills-hint mono">{skills.hud.hint}</span>
+      </div>
+      <div class="skills-intro">
+        <h2 class="skills-title" data-reveal-lines><span class="mask-line"><span>{c.sections.skills.title}</span></span></h2>
+        <p class="skills-sub">{skills.sub}</p>
+      </div>
+    </div>
+    <div class="skills-hud">
+      <div class="skills-count-line">
+        <span class="skills-counter">001</span>
+        <span class="skills-total mono" aria-label={`${skills.hud.of} ${skills.count} ${skills.hud.skills}`}>/ {skills.count} {skills.hud.skills}</span>
+      </div>
+      <span class="skills-current-label mono">{skills.hud.current}</span>
+      <span class="skills-current">{words[0].word}</span>
+      <span class="skills-current-group mono">{skills.groups[0].label}</span>
+    </div>
+    <div class="skills-chapters" aria-label={skills.hud.chapters}>
+      <span class="skills-rail" aria-hidden="true"><span class="skills-rail-fill"></span></span>
+      <span class="skills-chapters-title mono">{skills.hud.chapters}</span>
+      {skills.groups.map((group, i) => (
+        <div class:list={['skills-chapter', i === 0 && 'is-active']} data-group={group.id}>
+          <span class="skills-chapter-index mono">{String(i + 1).padStart(2, '0')}</span>
+          <span class="skills-chapter-label mono">{group.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+  <div class="skills-list wrap">
+    {skills.groups.map((group) => (
+      <div class="skills-list-group">
+        <h3 class="mono">{group.label}</h3>
+        <ul>{group.items.map((item) => <li>{item}</li>)}</ul>
+      </div>
+    ))}
+  </div>
+  <div class="skills-accessible sr-only">
+    {skills.groups.map((group) => (
+      <div><h3>{group.label}</h3><ul>{group.items.map((item) => <li>{item}</li>)}</ul></div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .skills { --fly-len: 600vh; position: relative; overflow-x: clip; padding-bottom: clamp(96px, 14vw, 200px); }
+  section.skills.has-fly { height: var(--fly-len); padding-block: 0; }
+  .skills-fallback { position: relative; z-index: 1; }
+  .skills.has-fly .skills-fallback, .skills.has-fly .skills-list { display: none; }
+  .skills-accessible { display: none; }
+  .skills.has-fly .skills-accessible { display: block; }
+  .sec-head { display: flex; gap: 14px; align-items: baseline; border-top: 1px solid var(--line-c); padding-top: 18px; margin-bottom: clamp(40px, 6vw, 80px); }
+  .index { color: var(--accent); }
+  .skills-title { font-family: var(--font-display), serif; font-weight: 400; font-size: var(--display-l); line-height: 1; letter-spacing: -.02em; }
+  .skills-sub { margin-top: 16px; max-width: 48ch; color: var(--fg-dim); font-size: clamp(15px, 1.25vw, 18px); }
+  .skills-stage { display: none; position: sticky; top: 0; height: 100svh; overflow: hidden; perspective: 1000px; perspective-origin: 50% 50%; z-index: 1; }
+  .skills.has-fly .skills-stage { display: block; }
+  .skills-monogram-guide { display: none; position: absolute; pointer-events: none; }
+  .skills-world { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; pointer-events: none; }
+  .skills-dust, .skills-ghost { position: absolute; left: 50%; top: 50%; visibility: hidden; opacity: 0; pointer-events: none; will-change: opacity; }
+  .skills-dust { width: 3px; height: 3px; border-radius: 50%; background: var(--fg); }
+  .skills-ghost { font-family: var(--font-display), serif; font-size: clamp(48px, 7vw, 120px); line-height: 1; color: var(--fg); white-space: nowrap; }
+  .skills-floor { position: absolute; left: 50%; top: 96%; width: 200vw; height: 9000px; transform-origin: 50% 100%; background: repeating-linear-gradient(to right, var(--line-c) 0 1px, transparent 1px 180px), repeating-linear-gradient(to bottom, var(--line-c) 0 1px, transparent 1px 140px); opacity: .35; mask-image: linear-gradient(to top, #000, transparent 75%); pointer-events: none; }
+  .skills-word {
+    position: absolute; left: 50%; top: 50%; white-space: nowrap; contain: layout style;
+    will-change: transform, opacity; pointer-events: none; visibility: hidden; opacity: 0;
+    font-family: var(--font-display), serif; font-size: calc(clamp(28px, 3.4vw, 52px) * var(--word-size));
+    line-height: 1; color: var(--fg);
+  }
+  .skills-word.is-italic { font-style: italic; }
+  .skills-word.is-near { color: var(--accent); }
+  .skills-stage.is-forming .skills-word.is-near { color: var(--fg); }
+  .skills-header { position: absolute; inset: clamp(72px, 10vh, 100px) 0 auto; z-index: 3; pointer-events: none; }
+  .skills-hint { margin-left: auto; }
+  .skills-intro { will-change: transform, opacity; }
+  .skills-hud { position: absolute; z-index: 3; isolation: isolate; left: max(var(--gutter), calc((100% - 1440px) / 2 + var(--gutter))); bottom: clamp(32px, 6vh, 64px); display: grid; gap: 8px; pointer-events: none; }
+  .skills-hud::before { content: ''; position: absolute; inset: -56px -128px -48px -56px; z-index: -1; background: radial-gradient(ellipse at 30% 70%, color-mix(in srgb, var(--bg) 92%, transparent) 0 44%, color-mix(in srgb, var(--bg) 75%, transparent) 62%, transparent 90%); }
+  .skills-count-line { display: flex; align-items: baseline; gap: 12px; }
+  .skills-counter { font-family: var(--font-display), serif; font-size: clamp(56px, 7vw, 110px); line-height: .9; font-variant-numeric: tabular-nums; }
+  .skills-total, .skills-current-label { color: var(--fg-faint); }
+  .skills-current { font-size: clamp(16px, 1.25vw, 18px); max-width: min(40vw, 34ch); }
+  .skills-current-group { color: var(--accent); }
+  .skills-chapters { position: absolute; right: max(var(--gutter), calc((100% - 1440px) / 2 + var(--gutter))); top: 50%; transform: translateY(-50%); z-index: 3; isolation: isolate; display: grid; gap: 15px; padding-left: 20px; pointer-events: none; }
+  .skills-chapters::before { content: ''; position: absolute; right: calc(-1 * var(--gutter)); top: -48px; bottom: -48px; width: 380px; z-index: -1; background: linear-gradient(90deg, transparent, var(--bg) 35%); }
+  .skills-chapters-title { color: var(--fg-faint); margin-bottom: 4px; }
+  .skills-rail { position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--line-c); }
+  .skills-rail-fill { display: block; width: 100%; height: 100%; background: var(--accent); transform: scaleY(0); transform-origin: top; }
+  .skills-chapter { display: flex; gap: 12px; }
+  .skills-chapter-index, .skills-chapter-label { color: var(--fg-faint); }
+  .skills-chapter.is-active .skills-chapter-index { color: var(--accent); }
+  .skills-chapter.is-active .skills-chapter-label { color: var(--fg); }
+  .skills-list { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(32px, 4vw, 64px); margin-top: clamp(48px, 6vw, 88px); }
+  .skills-list-group { border-top: 1px solid var(--line-c); padding-top: 18px; }
+  .skills-list-group h3 { color: var(--accent); margin-bottom: 18px; }
+  .skills-list-group ul { list-style: none; display: grid; gap: 8px; font-size: 15px; line-height: 1.4; }
+  @media (min-width: 1024px) and (max-height: 800px) {
+    .skills-intro { margin-top: -28px; }
+  }
+  @media (max-width: 1023px) {
+    .skills-stage.has-monogram .skills-monogram-guide { display: block; }
+    .skills { --fly-len: 400vh; }
+    .skills-word { font-size: calc(clamp(22px, 6vw, 30px) * var(--word-size)); }
+    .skills-chapters { display: none; }
+    .skills-floor { display: none; }
+    .skills-current { max-width: 75vw; }
+    .skills-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 600px) {
+    .skills-header { top: 72px; }
+    .skills-hint { font-size: 9px; max-width: 14ch; text-align: right; }
+    .skills-list { grid-template-columns: 1fr; }
+  }
+</style>

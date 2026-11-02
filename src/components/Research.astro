@@ -1,0 +1,559 @@
+---
+import type { SiteContent } from '../content/site';
+import GhostIndex from './GhostIndex.astro';
+interface Props { c: SiteContent }
+const { c } = Astro.props;
+const P = c.research.scope.parts;
+const scopeNodes = [
+  { key: 'chamber', text: P.chamber },
+  { key: 'eColumn', text: P.eColumn },
+  { key: 'iColumn', text: P.iColumn },
+  { key: 'detector', text: P.detector },
+  { key: 'edx', text: P.edx },
+  { key: 'stage', text: P.stage },
+  { key: 'sample', text: P.sample },
+  { key: 'beamE', text: P.beamE },
+  { key: 'beamI', text: P.beamI },
+  { key: 'trench', text: P.trench },
+  { key: 'zno', text: c.research.layers.zno },
+  { key: 'sic', text: c.research.layers.sic },
+  { key: 'cu', text: c.research.layers.cu },
+  { key: 'scale', text: P.scale },
+];
+// deterministic hash positions for particles/speckles
+const h = (n: number) => {
+  const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453;
+  return x - Math.floor(x);
+};
+const particles = Array.from({ length: 48 }, (_, i) => {
+  let j = 0, cx = 0;
+  do {
+    cx = 150 + h(i + j * 400) * 300;
+    j++;
+  } while (cx >= 238 && cx <= 384 && j <= 3);
+  return {
+    cx,
+    cy: 296 + h(i + 100) * 160,
+    r: 2.5 + h(i + 200) * 5.5,
+    fill: h(i + 300) < 0.18,
+    skip: cx >= 238 && cx <= 384,
+  };
+}).filter((p) => !p.skip);
+const speckles = Array.from({ length: 22 }, (_, i) => ({
+  cx: 170 + h(i + 500) * 260,
+  cy: 208 + h(i + 600) * 64,
+  r: 1 + h(i + 700) * 1.5,
+}));
+---
+<section id="research" data-theme="ink" class="research">
+  <div class="research-pin">
+    <div class="research-copy">
+      <GhostIndex value="04" />
+      <div class="sec-head">
+        <span class="mono index">{c.sections.research.index}</span>
+        <span class="mono">— {c.sections.research.title}</span>
+      </div>
+      <h2 class="res-title" data-reveal-lines>
+        <span class="mask-line"><span>{c.sections.research.title}</span></span>
+      </h2>
+      <p class="res-quote">{c.research.quote}</p>
+      <dl class="spec-card mono">
+        {c.research.spec.map((row) => (
+          <div class="spec-row">
+            <span class="spec-line" aria-hidden="true"></span>
+            <dt>{row.label}</dt><dd>{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div class="res-link-wrap">
+        <a class="res-link mono" href={c.research.linkHref} target="_blank" rel="noopener">
+          <span class="btn-label"><span>{c.research.linkLabel}</span><span aria-hidden="true">{c.research.linkLabel}</span></span>
+        </a>
+        <p class="res-note mono">{c.research.linkNote}</p>
+      </div>
+    </div>
+    <div class="research-stage">
+      <div class="stage-canvas">
+        <canvas id="scopeCanvas" aria-hidden="true"></canvas>
+        {scopeNodes.map((node) => (
+          <span class="scope-node mono" data-scope-node={node.key} aria-hidden="true">{node.text}</span>
+        ))}
+        <svg class="scope" viewBox="0 0 600 720" aria-hidden="true">
+          <defs>
+            <filter id="beamGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="3" />
+            </filter>
+          </defs>
+          <!-- ===== vacuum chamber ===== -->
+          <rect class="draw" x="90" y="400" width="420" height="240" rx="14" />
+          <rect class="draw" x="80" y="392" width="440" height="8" />
+          <line class="draw" x1="110" y1="392" x2="110" y2="384" /><line class="draw" x1="180" y1="392" x2="180" y2="384" />
+          <line class="draw" x1="260" y1="392" x2="260" y2="384" /><line class="draw" x1="340" y1="392" x2="340" y2="384" />
+          <line class="draw" x1="420" y1="392" x2="420" y2="384" /><line class="draw" x1="490" y1="392" x2="490" y2="384" />
+          <rect class="draw" x="150" y="640" width="60" height="20" />
+          <rect class="draw" x="390" y="640" width="60" height="20" />
+          <circle class="draw" cx="110" cy="600" r="18" />
+          <circle class="draw" cx="110" cy="600" r="12" />
+          <!-- ===== electron column ===== -->
+          <line class="draw" x1="284" y1="36" x2="316" y2="36" />
+          <rect class="draw" x="262" y="36" width="76" height="68" rx="6" />
+          <line class="draw" x1="262" y1="60" x2="242" y2="60" />
+          <line class="draw" x1="338" y1="60" x2="358" y2="60" />
+          <line class="draw" x1="282" y1="104" x2="282" y2="392" />
+          <line class="draw" x1="318" y1="104" x2="318" y2="392" />
+          <line class="draw" x1="282" y1="140" x2="318" y2="140" />
+          <line class="draw" x1="282" y1="200" x2="318" y2="200" />
+          <line class="draw" x1="282" y1="260" x2="318" y2="260" />
+          <line class="draw" x1="282" y1="330" x2="318" y2="330" />
+          <rect class="draw" x="252" y="150" width="20" height="34" />
+          <rect class="draw" x="328" y="150" width="20" height="34" />
+          <line class="draw faint" x1="252" y1="160" x2="272" y2="160" /><line class="draw faint" x1="252" y1="170" x2="272" y2="170" />
+          <line class="draw faint" x1="328" y1="160" x2="348" y2="160" /><line class="draw faint" x1="328" y1="170" x2="348" y2="170" />
+          <rect class="draw" x="252" y="236" width="20" height="34" />
+          <rect class="draw" x="328" y="236" width="20" height="34" />
+          <line class="draw faint" x1="252" y1="246" x2="272" y2="246" /><line class="draw faint" x1="252" y1="256" x2="272" y2="256" />
+          <line class="draw faint" x1="328" y1="246" x2="348" y2="246" /><line class="draw faint" x1="328" y1="256" x2="348" y2="256" />
+          <line class="draw" x1="288" y1="130" x2="297" y2="130" /><line class="draw" x1="303" y1="130" x2="312" y2="130" />
+          <line class="draw" x1="288" y1="215" x2="297" y2="215" /><line class="draw" x1="303" y1="215" x2="312" y2="215" />
+          <line class="draw" x1="288" y1="290" x2="297" y2="290" /><line class="draw" x1="303" y1="290" x2="312" y2="290" />
+          <rect class="draw" x="270" y="300" width="14" height="18" />
+          <rect class="draw" x="316" y="300" width="14" height="18" />
+          <line class="draw" x1="282" y1="340" x2="248" y2="400" />
+          <line class="draw" x1="318" y1="340" x2="352" y2="400" />
+          <line class="draw" x1="294" y1="340" x2="292" y2="400" />
+          <line class="draw" x1="306" y1="340" x2="308" y2="400" />
+          <path class="draw" d="M 262 400 L 288 424 L 312 424 L 338 400" />
+          <!-- ===== ion column (tilted 52° about the coincidence point) ===== -->
+          <g class="icol" transform="rotate(52 300 512)">
+            <line class="draw" x1="284" y1="140" x2="284" y2="390" />
+            <line class="draw" x1="316" y1="140" x2="316" y2="390" />
+            <line class="draw" x1="284" y1="220" x2="316" y2="220" />
+            <line class="draw" x1="284" y1="320" x2="316" y2="320" />
+            <rect class="draw" x="254" y="240" width="20" height="34" />
+            <rect class="draw" x="326" y="240" width="20" height="34" />
+            <line class="draw faint" x1="254" y1="250" x2="274" y2="250" /><line class="draw faint" x1="326" y1="250" x2="346" y2="250" />
+            <line class="draw" x1="290" y1="185" x2="297" y2="185" /><line class="draw" x1="303" y1="185" x2="310" y2="185" />
+            <line class="draw" x1="290" y1="295" x2="297" y2="295" /><line class="draw" x1="303" y1="295" x2="310" y2="295" />
+            <rect class="draw" x="266" y="90" width="68" height="50" rx="5" />
+            <line class="draw" x1="286" y1="90" x2="314" y2="90" />
+          </g>
+          <!-- ===== detectors ===== -->
+          <rect class="draw" x="150" y="435" width="36" height="22" />
+          <line class="draw" x1="150" y1="446" x2="126" y2="446" />
+          <line class="draw faint" x1="186" y1="437" x2="186" y2="455" />
+          <line class="draw faint" x1="190" y1="438" x2="190" y2="454" />
+          <line class="draw faint" x1="194" y1="439" x2="194" y2="453" />
+          <rect class="draw" x="400" y="494" width="104" height="12" />
+          <rect class="draw" x="396" y="488" width="8" height="24" />
+          <line class="draw faint" x1="400" y1="500" x2="316" y2="510" />
+          <rect class="draw" x="470" y="412" width="28" height="20" />
+          <line class="draw" x1="484" y1="432" x2="484" y2="446" />
+          <!-- ===== stage ===== -->
+          <circle class="draw" cx="300" cy="522" r="10" />
+          <line class="draw" x1="288" y1="518" x2="312" y2="518" />
+          <rect class="draw" x="288" y="508" width="24" height="4" />
+          <line class="draw accent" x1="288" y1="508" x2="312" y2="508" />
+          <rect class="draw" x="220" y="528" width="160" height="10" />
+          <path class="draw faint" d="M 232 560 A 60 60 0 0 1 262 522" />
+          <rect class="draw" x="268" y="538" width="64" height="66" />
+          <line class="draw faint" x1="268" y1="554" x2="332" y2="554" />
+          <line class="draw faint" x1="268" y1="570" x2="332" y2="570" />
+          <line class="draw faint" x1="268" y1="586" x2="332" y2="586" />
+          <line class="draw faint" x1="268" y1="598" x2="332" y2="598" />
+          <rect class="draw" x="200" y="604" width="200" height="10" />
+          <!-- ===== beams ===== -->
+          <line id="beamE" x1="300" y1="424" x2="300" y2="508" />
+          <line id="beamI" x1="352" y1="428" x2="307" y2="505" />
+          <circle id="impact" cx="300" cy="512" r="7" filter="url(#beamGlow)" />
+          <path id="tiltArc" class="faint" d="M 300 478 A 34 34 0 0 1 327 491" />
+          <!-- ===== labels ===== -->
+          <text class="svg-label" x="98" y="380" data-at="0.10">{P.chamber}</text>
+          <line class="leader" x1="98" y1="386" x2="110" y2="396" data-at="0.10" />
+          <text class="svg-label" x="356" y="120" data-at="0.42">{P.eColumn}</text>
+          <line class="leader" x1="352" y1="122" x2="322" y2="122" data-at="0.42" />
+          <text class="svg-label" x="470" y="210" data-at="0.58">{P.iColumn}</text>
+          <line class="leader" x1="466" y1="214" x2="440" y2="238" data-at="0.58" />
+          <text class="svg-label" x="150" y="428" data-at="0.66">{P.detector}</text>
+          <line class="leader" x1="168" y1="431" x2="168" y2="435" data-at="0.66" />
+          <text class="svg-label" x="470" y="486" data-at="0.70">{P.edx}</text>
+          <line class="leader" x1="476" y1="489" x2="476" y2="494" data-at="0.70" />
+          <text class="svg-label" x="410" y="570" data-at="0.80">{P.stage}</text>
+          <line class="leader" x1="406" y1="566" x2="382" y2="560" data-at="0.80" />
+          <text class="svg-label" x="262" y="523" text-anchor="end" data-at="0.86">{P.sample}</text>
+          <line class="leader" x1="266" y1="521" x2="287" y2="511" data-at="0.86" />
+          <text class="svg-label" x="316" y="490" style="font-size:9px" data-at="0.90">{P.tilt}</text>
+          <text class="svg-label beam-label" x="262" y="468" text-anchor="end" data-at="0.92">{P.beamE}</text>
+          <line class="leader beam-label" x1="266" y1="466" x2="297" y2="470" data-at="0.92" />
+          <text class="svg-label beam-label accent-label" x="384" y="470" data-at="0.94">{P.beamI}</text>
+          <line class="leader beam-label" x1="381" y1="468" x2="357" y2="470" data-at="0.94" />
+        </svg>
+        <svg class="xsec" viewBox="0 0 600 720" aria-hidden="true">
+          <defs>
+            <clipPath id="trenchClip"><rect id="trenchClipRect" x="240" y="280" width="140" height="0" /></clipPath>
+            <filter id="xGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="3" />
+            </filter>
+          </defs>
+          <!-- isometric block -->
+          <path class="xdraw" d="M 140 280 L 460 280 L 420 200 L 180 200 Z" />
+          {speckles.map((s) => <circle class="xspeck" cx={s.cx} cy={s.cy} r={s.r} />)}
+          <rect class="xdraw" x="140" y="280" width="320" height="232" />
+          <rect class="xdraw accent-band" x="140" y="280" width="320" height="8" />
+          {particles.map((p) =>
+            p.fill
+              ? <circle class="xpart-fill" cx={p.cx} cy={p.cy} r={p.r} />
+              : <ellipse class="xpart" cx={p.cx} cy={p.cy} rx={p.r} ry={p.r * 0.75} />
+          )}
+          <rect class="xdraw" x="140" y="468" width="320" height="44" />
+          <line class="xdraw faint" x1="150" y1="512" x2="170" y2="468" /><line class="xdraw faint" x1="200" y1="512" x2="220" y2="468" />
+          <line class="xdraw faint" x1="250" y1="512" x2="270" y2="468" /><line class="xdraw faint" x1="300" y1="512" x2="320" y2="468" />
+          <line class="xdraw faint" x1="350" y1="512" x2="370" y2="468" /><line class="xdraw faint" x1="400" y1="512" x2="420" y2="468" />
+          <!-- FIB trench: vertical wall + stair-step ramp, clipped to grow with milling -->
+          <path id="trenchOpen" d="M 250 280 L 372 280 L 384 258 L 262 258 Z" />
+          <g clip-path="url(#trenchClip)">
+            <path id="trenchCut" d="M 250 280 L 250 400 L 300 400 L 300 376 L 318 376 L 318 352 L 336 352 L 336 328 L 354 328 L 354 304 L 372 304 L 372 280" />
+            <line class="tzno" x1="250" y1="284" x2="372" y2="284" />
+            <ellipse class="tfaint" cx="262" cy="320" rx="4" ry="3" /><ellipse class="tfaint" cx="270" cy="352" rx="5" ry="3.5" />
+            <ellipse class="tfaint" cx="264" cy="384" rx="3" ry="2.5" /><ellipse class="tfaint" cx="352" cy="316" rx="4" ry="3" />
+            <ellipse class="tfaint" cx="364" cy="288" rx="3" ry="2" />
+            <line class="tfaint" x1="300" y1="376" x2="318" y2="376" /><line class="tfaint" x1="318" y1="352" x2="336" y2="352" />
+            <line class="tfaint" x1="336" y1="328" x2="354" y2="328" /><line class="tfaint" x1="354" y1="304" x2="372" y2="304" />
+          </g>
+          <!-- scan line + trailing band -->
+          <rect id="scanBand" x="140" y="282" width="320" height="14" />
+          <line id="scanLine" x1="140" y1="296" x2="460" y2="296" />
+          <!-- beams into the trench -->
+          <line id="xBeamE" x1="276" y1="140" x2="276" y2="396" />
+          <line id="xBeamI" x1="556" y1="180" x2="276" y2="398" />
+          <circle id="xImpact" cx="276" cy="398" r="6" filter="url(#xGlow)" />
+          <g id="spray">
+            <line x1="276" y1="398" x2="264" y2="382" /><line x1="276" y1="398" x2="290" y2="384" />
+            <line x1="276" y1="398" x2="272" y2="380" /><line x1="276" y1="398" x2="260" y2="392" />
+            <line x1="276" y1="398" x2="292" y2="390" /><line x1="276" y1="398" x2="282" y2="380" />
+          </g>
+          <!-- labels -->
+          <text class="svg-label x-label" x="150" y="120" data-xq="0.02">{P.beamE}</text>
+          <line class="leader" x1="178" y1="126" x2="274" y2="150" data-xq="0.02" />
+          <text class="svg-label x-label" x="470" y="288" data-xq="0.18">{c.research.layers.zno}</text>
+          <line class="leader" x1="466" y1="288" x2="462" y2="284" data-xq="0.18" />
+          <text class="svg-label x-label" x="470" y="380" data-xq="0.38">{c.research.layers.sic}</text>
+          <line class="leader" x1="466" y1="378" x2="462" y2="370" data-xq="0.38" />
+          <text class="svg-label x-label" x="470" y="492" data-xq="0.55">{c.research.layers.cu}</text>
+          <line class="leader" x1="466" y1="492" x2="462" y2="490" data-xq="0.55" />
+          <text class="svg-label x-label" x="150" y="236" data-xq="0.62">{P.trench}</text>
+          <line class="leader" x1="184" y1="241" x2="258" y2="259" data-xq="0.62" />
+          <g id="trenchBracket" data-xq="0.62">
+            <line x1="262" y1="250" x2="384" y2="250" stroke="var(--fg-faint)" />
+            <line x1="262" y1="246" x2="262" y2="254" stroke="var(--fg-faint)" />
+            <line x1="384" y1="246" x2="384" y2="254" stroke="var(--fg-faint)" />
+          </g>
+          <g id="scaleBar" data-xq="0.66">
+            <line x1="420" y1="560" x2="460" y2="560" stroke="var(--fg)" />
+            <line x1="420" y1="556" x2="420" y2="564" stroke="var(--fg)" />
+            <line x1="460" y1="556" x2="460" y2="564" stroke="var(--fg)" />
+            <text class="svg-label nocaps" x="418" y="578">{P.scale}</text>
+          </g>
+        </svg>
+      </div>
+      <div class="scope-hud mono">
+        <span class="hud-phase">{c.research.scope.phases[0]}</span>
+        <span class="hud-read"></span>
+      </div>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="process">
+      <div class="process-line" aria-hidden="true"></div>
+      {c.research.steps.map((s, i) => (
+        <div class="process-step">
+          <div class="p-n mono">{String(i + 1).padStart(2, '0')}</div>
+          <div class="p-t">{s.title}</div>
+          <div class="p-d">{s.desc}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .research { padding-block: clamp(96px, 14vw, 200px) 0; }
+  .research-pin {
+    min-height: 100svh;
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: clamp(32px, 5vw, 80px);
+    align-items: center;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+    width: 100%;
+  }
+  .research-copy { position: relative; isolation: isolate; }
+  .research-copy :global(.ghost-index) { right: 0; }
+  .research-copy > .sec-head, .research-copy > .res-title, .research-copy > .res-quote,
+  .research-copy > .spec-card, .research-copy > .res-link-wrap { position: relative; z-index: 1; }
+  .sec-head {
+    display: flex; gap: 14px; align-items: baseline;
+    border-top: 1px solid var(--line-c);
+    padding-top: 18px;
+    margin-bottom: clamp(24px, 3vw, 44px);
+  }
+  .index { color: var(--accent); }
+  .res-title {
+    font-family: var(--font-display), serif;
+    font-weight: 400;
+    font-size: var(--display-l);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .res-quote {
+    font-family: var(--font-display), serif;
+    font-style: italic;
+    font-size: var(--display-m);
+    line-height: 1.28;
+    margin-top: clamp(22px, 3vw, 36px);
+    text-indent: -0.45em;
+  }
+  .spec-card { margin-top: 26px; font-size: 11px; }
+  .spec-row { position: relative; display: grid; grid-template-columns: minmax(98px, 1fr) minmax(0, 2fr); gap: 12px; padding: 8px 0; line-height: 1.4; }
+  .spec-row:last-child { border-bottom: 1px solid var(--line-c); }
+  .spec-line { position: absolute; inset: 0 0 auto; height: 1px; background: var(--line-c); transform-origin: left; }
+  .spec-row dt { color: var(--fg-faint); }
+  .spec-row dd { color: var(--fg); text-transform: none; letter-spacing: .02em; }
+  .res-link-wrap { margin-top: 24px; }
+  .res-link {
+    display: inline-block;
+    max-width: 100%;
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 5px;
+  }
+  .res-note { margin-top: 10px; color: var(--fg-faint); }
+  .research-stage {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+  }
+  .stage-canvas {
+    position: relative;
+    height: min(80svh, 120vw);
+    aspect-ratio: 5 / 6;
+    width: auto;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  .stage-canvas::before {
+    content: '';
+    position: absolute;
+    inset: -6%;
+    pointer-events: none;
+    z-index: 0;
+    background-image: radial-gradient(var(--line-c) 1px, transparent 1px);
+    background-size: 24px 24px;
+    -webkit-mask-image: radial-gradient(ellipse at center, black 55%, transparent 85%);
+    mask-image: radial-gradient(ellipse at center, black 55%, transparent 85%);
+  }
+  .scope, .xsec {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: visible;
+  }
+  #scopeCanvas {
+    display: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+  .has-3d #scopeCanvas { display: block; }
+  .has-3d .scope, .has-3d .xsec { display: none; }
+  .scope-node {
+    display: none;
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+    transform: translate(0, -100%);
+    color: var(--fg-dim);
+    font-size: 10px;
+    white-space: nowrap;
+    line-height: 1.3;
+    padding-left: 18px;
+  }
+  .has-3d .scope-node { display: block; }
+  .scope-node::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .scope-node::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    bottom: 2px;
+    width: 14px;
+    height: 1px;
+    background: var(--fg-faint);
+  }
+  .scope-node.edge { transform: translate(-100%, -100%); padding-left: 0; padding-right: 18px; text-align: right; }
+  .scope-node.edge::before { left: auto; right: 0; }
+  .scope-node.edge::after { left: auto; right: 4px; }
+  .scope-node[data-scope-node="beamE"] { transform: translate(-100%, -100%); padding-left: 0; padding-right: 18px; text-align: right; }
+  .scope-node[data-scope-node="beamE"]::before { left: auto; right: 0; }
+  .scope-node[data-scope-node="beamE"]::after { left: auto; right: 4px; }
+  .scope-node[data-scope-node="scale"] { text-transform: none; }
+  .js .xsec { opacity: 0; }
+  .scope .draw {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 1.2;
+  }
+  .scope .draw.faint, .xsec .faint, .xsec line.faint { stroke: var(--fg-faint); }
+  .scope .draw.accent { stroke: var(--accent); }
+  #beamE, #beamI { stroke: var(--fg); stroke-width: 1; stroke-dasharray: 4 6; fill: none; }
+  #beamI { stroke: var(--accent); stroke-width: 1.5; }
+  #impact, #xImpact { fill: var(--accent); }
+  #tiltArc { stroke: var(--fg-faint); stroke-dasharray: 2 4; fill: none; }
+  .js #beamE, .js #beamI, .js #impact, .js #tiltArc { opacity: 0; }
+  .svg-label {
+    font-family: var(--font-mono), monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    fill: var(--fg-dim);
+  }
+  .svg-label.nocaps { text-transform: none; }
+  .accent-label { fill: var(--accent); }
+  .leader { stroke: var(--fg-faint); stroke-width: 1; }
+  .xsec .xdraw { fill: none; stroke: var(--fg); stroke-width: 1.2; }
+  .xsec .accent-band { fill: var(--accent); fill-opacity: 0.85; stroke: none; }
+  .xspeck { fill: none; stroke: var(--fg-faint); stroke-width: 0.8; }
+  .xpart { fill: none; stroke: var(--fg-faint); stroke-width: 0.9; }
+  .xpart-fill { fill: var(--fg); opacity: 0.25; }
+  #trenchCut { fill: var(--bg); stroke: var(--fg); stroke-width: 1.2; }
+  #trenchOpen { fill: var(--bg); fill-opacity: 0.7; stroke: var(--fg-faint); stroke-width: 1; opacity: 0; }
+  .tzno { stroke: var(--accent); stroke-width: 1; opacity: 0.45; }
+  .tfaint { fill: none; stroke: var(--fg-faint); stroke-width: 0.8; }
+  #scanLine { stroke: var(--accent); stroke-width: 1; }
+  #scanBand { fill: var(--accent); opacity: 0.06; }
+  #xBeamE { stroke: var(--fg); stroke-width: 1; stroke-dasharray: 4 6; }
+  #xBeamI { stroke: var(--accent); stroke-width: 1.5; }
+  #spray line { stroke: var(--accent); stroke-width: 1; opacity: 0; }
+  .js .x-label, .js .xsec .leader, .js #scaleBar, .js #trenchBracket { opacity: 0; }
+  .js .beam-label { opacity: 0; }
+  .scope-hud {
+    border-top: 1px solid var(--line-c);
+    padding-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    color: var(--fg-dim);
+  }
+  .hud-read {
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    text-transform: none;
+  }
+
+  /* reduced-motion / static flow: side-by-side */
+  .research-pin.static-flow { grid-template-columns: 1fr; min-height: 0; gap: 48px; }
+  .static-flow .research-copy { max-width: 72ch; }
+  .static-flow .stage-canvas {
+    height: auto;
+    aspect-ratio: auto;
+    width: 100%;
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .static-flow .scope, .static-flow .xsec {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 5 / 6;
+  }
+  .static-flow .scope-hud { border-top: 1px solid var(--line-c); }
+  @media (max-width: 700px) {
+    .static-flow .stage-canvas { grid-template-columns: 1fr; }
+  }
+  @media (min-width: 1024px) and (max-height: 760px) {
+    .res-quote { font-size: clamp(20px, 1.9vw, 30px); }
+  }
+
+  @media (max-width: 1023px) {
+    .has-3d .scope-node[data-scope-node="beamE"],
+    .has-3d .scope-node[data-scope-node="beamI"],
+    .has-3d .scope-node[data-scope-node="sample"],
+    .has-3d .scope-node[data-scope-node="detector"],
+    .has-3d .scope-node[data-scope-node="edx"] { display: none; }
+    .research-pin { grid-template-columns: 1fr; min-height: 0; gap: 48px; }
+    .stage-canvas {
+      height: auto;
+      aspect-ratio: auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .scope, .xsec {
+      position: relative;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 5 / 6;
+      max-height: 70vh;
+      display: block;
+    }
+    .has-3d #scopeCanvas {
+      position: relative;
+      inset: auto;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 5 / 6;
+      max-height: 70vh;
+    }
+    .has-3d .scope { display: none; }
+    .has-3d .xsec { display: block; }
+  }
+  @media (max-width: 820px) {
+    .res-link :global(.btn-label) { height: auto; white-space: normal; }
+    .res-link :global(.btn-label > span + span) { display: none; }
+  }
+  .process {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(24px, 3vw, 48px);
+    position: relative;
+    padding-top: 40px;
+    margin-top: clamp(64px, 9vw, 130px);
+    padding-bottom: clamp(96px, 14vw, 200px);
+  }
+  .process-line {
+    position: absolute;
+    top: 20px; left: 0; right: 0;
+    height: 1px;
+    background: var(--line-c);
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+  .p-n { color: var(--accent); }
+  .p-t { font-weight: 500; margin-top: 14px; font-size: 17px; }
+  .p-d { color: var(--fg-dim); margin-top: 10px; line-height: 1.6; font-size: 14.5px; }
+  @media (max-width: 900px) {
+    .process { grid-template-columns: 1fr; padding-top: 0; gap: 40px; }
+    .process-line { top: 0; bottom: 0; right: auto; width: 1px; height: auto; transform-origin: top; transform: scaleY(0); }
+    .process-step { padding-left: 32px; }
+  }
+</style>

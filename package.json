@@ -1,0 +1,32 @@
+{
+  "name": "danielstorcel-v2",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "check": "astro check",
+    "preview": "astro preview",
+    "og": "node scripts/og.mjs",
+    "dem": "node scripts/dem.mjs",
+    "shoot": "node scripts/shoot.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.4.2",
+    "gsap": "^3.15.0",
+    "lenis": "^1.3.27",
+    "sharp": "^0.35.5",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@types/three": "^0.186.0",
+    "playwright": "^1.64.1",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,282 @@
+---
+import type { SiteContent } from '../content/site';
+import { Picture } from 'astro:assets';
+import foodathonImg from '../assets/ach-foodathon.jpg';
+import grynadeImg from '../assets/grynade-product.jpg';
+import GhostIndex from './GhostIndex.astro';
+interface Props { c: SiteContent }
+const { c } = Astro.props;
+const stageValue = { idea: 1, concept: 2, prototype: 3, live: 4 };
+---
+<section id="work" data-theme="graphite" class="work section-grid" data-tile-copy={JSON.stringify(c.work.tileCopy)}>
+  <GhostIndex value="03" />
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="mono index">{c.sections.work.index}</span>
+      <span class="mono">— {c.sections.work.title}</span>
+    </div>
+    <h2 class="work-title" data-reveal-lines>
+      <span class="mask-line"><span>{c.sections.work.title}</span></span>
+    </h2>
+    <p class="work-intro">{c.work.intro}</p>
+    <div class="work-score">
+      {c.work.score.map((stat) => (
+        <div class="work-score-cell">
+          <span class="work-score-value" data-value={stat.value}>{stat.value}</span>
+          <span class="work-score-label mono">{stat.label}</span>
+        </div>
+      ))}
+    </div>
+    <div class="work-list">
+      {c.work.items.map((item, i) => (
+        <div class="work-item" data-tile={item.tile} data-open={i === 0 ? 'true' : undefined} data-live={item.stage !== 'idea' && /ongoing|prebieha/i.test(item.status) ? '' : undefined}>
+          <span class="work-line" aria-hidden="true"></span>
+          <button class="work-row" aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`work-body-${i}`}>
+            <span class="w-idx mono">{String(i + 1).padStart(2, '0')}</span>
+            <span class="w-name"><span class="w-name-ink">{item.name}</span></span>
+            <span class="w-right">
+              <span class="w-stage" role="img" aria-label={`${c.work.stages[item.stage]} · ${stageValue[item.stage]}/4`}>
+                <span class="w-stage-bars" aria-hidden="true">
+                  {Array.from({ length: 4 }, (_, n) => <span class:list={['w-stage-segment', n < stageValue[item.stage] && 'is-filled']}></span>)}
+                </span>
+                <span class="w-stage-label mono" aria-hidden="true">{c.work.stages[item.stage]}</span>
+              </span>
+              <span class="w-status mono"><span class="w-dot"></span>{item.status}</span>
+              <span class="w-plus-wrap" data-magnetic aria-hidden="true"><span class="w-plus">+</span></span>
+            </span>
+          </button>
+          <div class="work-body" id={`work-body-${i}`}>
+            <div class="work-body-inner">
+              <p class="w-desc">{item.desc}</p>
+              <div class="w-side">
+                <p class="w-part" set:html={item.part} />
+                <p class="w-skills mono">{item.skills.join(', ')}</p>
+                {item.link && (
+                  <a class="w-link mono" href={item.link.href} target="_blank" rel="noopener">
+                    <span class="btn-label"><span>{item.link.label}</span><span aria-hidden="true">{item.link.label}</span></span>
+                  </a>
+                )}
+              </div>
+              <div class="w-tile" data-tile={item.tile} data-running="0" aria-hidden="true">
+                <div class:list={['w-tile-inner', item.tile]}>
+                  {item.tile === 'carbontrail' && (
+                    <>
+                      <Picture src={foodathonImg} alt="" formats={['avif', 'webp']} widths={[600, 900]} sizes="(min-width: 1024px) 35vw, 90vw" loading="lazy" class="tile-photo" />
+                      <svg class="carbon-trail" viewBox="0 0 300 120" preserveAspectRatio="none"><path d="M 305 40 C 255 46 230 75 182 69 S 110 84 42 100" /></svg>
+                      <span class="carbon-label mono"><span class="carbon-score">{['A', 'B', 'C', 'D', 'E'].map((letter) => <span class:list={['carbon-cell', letter === 'B' && 'is-b']}>{letter}</span>)}</span>{c.work.tileCopy.carbonLabel}</span>
+                    </>
+                  )}
+                  {item.tile === 'grynade' && <>
+                    <Picture src={grynadeImg} alt="" formats={['avif', 'webp']} widths={[500, 900]} sizes="(min-width: 1024px) 35vw, 90vw" loading="lazy" class="gry-photo" />
+                    <span class="gry-scrim"></span>
+                  </>}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+  <div class="work-preview" aria-hidden="true">
+    {c.work.items.map((item, i) => (
+      <div class:list={['wp-slide', item.tile]} data-tile={item.tile}>
+        {item.tile === 'grynade' && <Picture src={grynadeImg} alt="" formats={['avif', 'webp']} widths={[500, 900]} sizes="260px" loading="lazy" class="gry-preview-photo" />}
+        <span class="wp-name">{item.name}</span>
+        <span class="wp-rule"></span>
+        <span class="wp-index">{String(i + 1).padStart(2, '0')}</span>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .sec-head {
+    display: flex; gap: 14px; align-items: baseline;
+    border-top: 1px solid var(--line-c);
+    padding-top: 18px;
+    margin-bottom: clamp(40px, 6vw, 80px);
+  }
+  .index { color: var(--accent); }
+  .work-title {
+    font-family: var(--font-display), serif;
+    font-weight: 400;
+    font-size: var(--display-l);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .work-intro { margin-top: 16px; color: var(--fg-dim); font-size: clamp(15px, 1.25vw, 18px); max-width: 52ch; margin-bottom: 32px; }
+  .work-score { display: grid; grid-template-columns: repeat(4, 1fr); border-block: 1px solid var(--line-c); margin-bottom: clamp(40px, 5vw, 72px); }
+  .work-score-cell { padding: clamp(20px, 3vw, 36px) 16px; display: grid; gap: 8px; }
+  .work-score-cell:first-child { padding-left: 0; }
+  .work-score-cell + .work-score-cell { border-left: 1px solid var(--line-c); }
+  .work-score-value { font-family: var(--font-display), serif; font-size: clamp(40px, 4.6vw, 64px); line-height: 1; font-variant-numeric: tabular-nums; }
+  .work-score-label { color: var(--fg-faint); }
+  .work-item { position: relative; }
+  .work-line { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--line-c); transform-origin: left; }
+  .work-item:last-child { border-bottom: 1px solid var(--line-c); }
+  .work-row {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(16px, 3vw, 40px);
+    width: 100%;
+    padding: clamp(20px, 3vw, 36px) 0;
+    background: none;
+    border: 0;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .w-idx { color: var(--fg-faint); transition: color 0.35s; }
+  .w-name {
+    font-family: var(--font-display), serif;
+    font-size: clamp(40px, 6.2vw, 96px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    transition: transform 0.35s var(--ease-out);
+  }
+  .w-right { margin-left: auto; display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+  .w-stage, .w-stage-bars { display: inline-flex; align-items: center; gap: 4px; }
+  .w-stage { gap: 10px; }
+  .w-stage-segment { display: block; width: 18px; height: 2px; background: var(--line-c); transform-origin: left; }
+  .w-stage-segment.is-filled { background: var(--accent); }
+  .w-stage-label { color: var(--fg-faint); }
+  .w-status { display: flex; align-items: center; gap: 8px; color: var(--fg-dim); }
+  .w-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .work-item[data-live] .w-dot { position: relative; }
+  .work-item[data-live] .w-dot::after { content: ''; position: absolute; inset: -4px; border: 1px solid var(--accent); border-radius: 50%; animation: work-pulse 2.4s ease-out infinite; }
+  @keyframes work-pulse { 0% { transform: scale(.4); opacity: .7; } 80%, 100% { transform: scale(1.8); opacity: 0; } }
+  .w-plus-wrap { display: inline-flex; }
+  .w-plus {
+    font-family: var(--font-display), serif;
+    font-size: 32px;
+    line-height: 1;
+    transition: transform 0.4s var(--ease-out);
+    display: inline-block;
+    width: 1ch;
+  }
+  .work-item[data-open] .w-plus { transform: rotate(45deg); }
+  @media (pointer: fine) {
+    .work-row:hover .w-idx { color: var(--accent); }
+  }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .work-row:hover .w-name { transform: translateX(12px); }
+    .work-item:not([data-open]) .w-name-ink {
+      color: transparent;
+      background: linear-gradient(90deg, var(--accent) 50%, var(--fg) 50%) 100% 0 / 200% 100%;
+      -webkit-background-clip: text; background-clip: text;
+      transition: background-position .6s var(--ease-out);
+    }
+    .work-item:not([data-open]) .work-row:hover .w-name-ink { background-position: 0 0; }
+  }
+  .work-body { overflow: hidden; }
+  .work-body-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 3fr) minmax(380px, 5fr);
+    gap: clamp(28px, 4vw, 72px);
+    padding-bottom: clamp(28px, 4vw, 52px);
+    padding-left: clamp(40px, 8vw, 140px);
+  }
+  .w-desc { font-size: clamp(16px, 1.4vw, 18px); line-height: 1.65; max-width: 52ch; }
+  .w-part { color: var(--fg-dim); line-height: 1.6; font-size: 15px; }
+  .w-part :global(b) { font-weight: 500; color: var(--fg); }
+  .w-skills { margin-top: 16px; color: var(--fg-faint); }
+  .w-link {
+    display: inline-block;
+    margin-top: 18px;
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 5px;
+  }
+  .work-preview {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 280px; height: 180px;
+    z-index: 50;
+    overflow: hidden;
+    border: 1px solid var(--line-c);
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0);
+  }
+  .w-tile { position: relative; aspect-ratio: 16 / 10; min-height: 180px; overflow: hidden; border: 1px solid var(--line-c); }
+  .wp-slide, .w-tile-inner { position: absolute; inset: 0; overflow: hidden; background: var(--ink); color: var(--text); padding: 22px; }
+  .wp-slide.grynade, .w-tile-inner.grynade { background: var(--accent); }
+  .wp-slide.mountains, .w-tile-inner.mountains { background: #050506; }
+  .wp-slide.aimtoru, .w-tile-inner.aimtoru { background: #f6f3ec; color: #101010; }
+  .wp-slide.aimtoru .wp-index { -webkit-text-stroke-color: #101010; }
+  .wp-slide.taro, .w-tile-inner.taro { background: #050506; }
+  .w-tile-inner.grynade { background: #000; color: #39ff14; }
+  .w-tile-inner:not(.carbontrail) { padding: 0; }
+  .w-tile-inner :global(.tile-photo) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .7; }
+  .wp-name { position: relative; z-index: 1; font-family: var(--font-display), serif; font-style: italic; font-size: 34px; line-height: 1; }
+  .wp-rule { position: relative; z-index: 1; display: block; width: 44px; height: 1px; margin-top: 14px; background: var(--accent); }
+  .grynade .wp-rule { background: var(--text); }
+  .wp-index {
+    position: absolute; right: 12px; bottom: -23px; z-index: 1;
+    font-family: var(--font-display), serif; font-size: 120px; line-height: 1;
+    color: transparent; -webkit-text-stroke: 1px var(--text);
+  }
+  .wp-slide::after {
+    content: ''; position: absolute; inset: -100%;
+    background: linear-gradient(110deg, transparent 40%, #fff 50%, transparent 60%);
+    opacity: .12; animation: wp-sheen 6s linear infinite;
+  }
+  .w-tile-inner :global(canvas) { display: block; width: 100%; height: 100%; }
+  .carbon-trail { position: absolute; inset: auto 0 0; width: 100%; height: 45%; z-index: 2; overflow: visible; }
+  .carbon-trail path { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke; }
+  .carbon-label { position: absolute; z-index: 3; bottom: 12px; left: 12px; display: grid; gap: 5px; padding: 7px; color: var(--text); background: rgba(5,5,6,.78); }
+  .carbon-score { display: flex; gap: 3px; }
+  .carbon-cell { display: grid; place-items: center; width: 18px; height: 18px; border: 1px solid rgba(239,234,224,.5); border-radius: 4px; font-size: 9px; }
+  .carbon-cell.is-b { background: var(--accent); border-color: var(--accent); }
+  :global(.gry-photo) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 60% 35%; }
+  .gry-scrim { position: absolute; inset: 0; z-index: 1; background: linear-gradient(0deg, rgba(0,0,0,.88), rgba(0,0,0,.35) 45%, transparent 70%); }
+  :global(.gry-preview-photo) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% 50%; opacity: .55; }
+  .wp-slide.grynade { background: #000; }
+  .w-tile-inner :global(.aim-layout) { position: absolute; inset: 0; display: grid; grid-template-columns: 56% 44%; font-family: var(--font-mono), monospace; color: #151515; }
+  .w-tile-inner :global(.aim-record), .w-tile-inner :global(.aim-facts) { position: relative; padding: 14px 10px; overflow: hidden; }
+  .w-tile-inner :global(.aim-record) { border-right: 1px solid rgba(0,0,0,.12); }
+  .w-tile-inner :global(.aim-heading) { font-size: 8px; font-weight: 600; margin-bottom: 10px; }
+  .w-tile-inner :global(.aim-facts .aim-heading) { margin-top: 20px; margin-bottom: 5px; }
+  .w-tile-inner :global(.aim-record-row) { height: 12px; display: flex; align-items: center; gap: 3px; }
+  .w-tile-inner :global(.aim-bar) { display: block; height: 3px; background: rgba(0,0,0,.12); transform-origin: left; }
+  .w-tile-inner :global(.aim-token) { font-size: 7px; white-space: nowrap; border-bottom: 1px solid transparent; }
+  .w-tile-inner :global(.aim-fact) { display: flex; align-items: center; gap: 5px; margin-top: 11px; }
+  .w-tile-inner :global(.aim-fact::before) { content: ''; width: 5px; height: 5px; background: var(--accent); flex: none; }
+  .w-tile-inner :global(.aim-fact-bars) { display: grid; gap: 4px; flex: 1; }
+  .w-tile-inner :global(.aim-lines) { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .w-tile-inner :global(.aim-lines path) { fill: none; stroke: var(--accent); stroke-width: .6; opacity: .75; vector-effect: non-scaling-stroke; }
+  .w-tile-inner :global(.aim-badge) { position: absolute; right: 8px; top: 7px; border: 1px solid var(--accent); color: #be3312; background: #f6f3ec; font-size: 7px; padding: 3px 4px; transform-origin: top; }
+  .w-tile-inner :global(.gry-title) { position: absolute; left: 16px; bottom: 34px; width: 19%; z-index: 2; color: #39ff14; font-family: var(--font-display), serif; font-style: italic; font-size: clamp(18px, 1.6vw, 26px); line-height: .95; text-shadow: 0 0 18px rgba(57,255,20,.55); }
+  .w-tile-inner :global(.gry-locked) { animation: gry-flicker 3.5s infinite; }
+  .w-tile-inner :global(.gry-count) { position: absolute; left: 16px; bottom: 16px; z-index: 2; color: rgba(57,255,20,.8); font-family: var(--font-mono), monospace; font-size: 11px; white-space: nowrap; }
+  .w-tile[data-running="0"] :global(.gry-locked) { animation-play-state: paused; }
+  @keyframes gry-flicker { 0%, 90%, 94%, 100% { opacity: 1; } 91%, 93% { opacity: .35; } }
+  @keyframes wp-sheen { from { transform: translateX(-30%); } to { transform: translateX(30%); } }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .work-preview { display: block; }
+  }
+  @media (max-width: 1023px) {
+    .work-body-inner { grid-template-columns: 1fr 1fr; }
+    .w-tile { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
+    .w-stage-label { display: none; }
+  }
+  @media (max-width: 820px) {
+    .work-row { padding-block: 20px; }
+    .work-body-inner { grid-template-columns: 1fr; padding-left: 0; }
+    .w-status { display: none; }
+    .w-right { gap: 10px; }
+    .w-stage-bars { gap: 3px; }
+    .w-name { font-size: clamp(32px, 9vw, 40px); min-width: 0; }
+    .work-score { grid-template-columns: repeat(2, 1fr); }
+    .work-score-cell:nth-child(3) { border-left: 0; border-top: 1px solid var(--line-c); padding-left: 0; }
+    .work-score-cell:nth-child(4) { border-top: 1px solid var(--line-c); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .work-item[data-live] .w-dot::after { animation: none; }
+    .w-tile-inner :global(.gry-locked) { animation: none; }
+  }
+</style>

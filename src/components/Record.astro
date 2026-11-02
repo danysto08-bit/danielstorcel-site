@@ -1,0 +1,293 @@
+---
+import { Picture } from 'astro:assets';
+import type { SiteContent } from '../content/site';
+import achCritical from '../assets/ach-critical-thinking.jpg';
+import achStats from '../assets/ach-statistics.jpg';
+import achFood from '../assets/ach-foodathon.jpg';
+interface Props { c: SiteContent }
+const { c } = Astro.props;
+const photos = [achCritical, achStats, achFood];
+const positions = ['50% 42%', '50% 38%', '50% 100%'];
+---
+<section id="record" data-theme="ink" class="record">
+  <div class="record-stage">
+    <div class="wrap rec-head">
+      <div class="rec-head-top">
+        <div>
+          <span class="mono index">{c.sections.record.index}</span>
+          <span class="mono">{' '}— {c.sections.record.title}</span>
+        </div>
+        <div class="rec-progress">
+          <span class="mono rec-counter" aria-label="01 — 04"><span class="rec-counter-window" aria-hidden="true"><span class="rec-counter-roll"><span>01</span><span>01</span></span></span><span aria-hidden="true"> — 04</span></span>
+          <div class="rec-bar"><div class="rec-bar-fill"></div></div>
+        </div>
+      </div>
+      <h2 class="rec-title" data-reveal-lines><span class="mask-line"><span>{c.sections.record.title}</span></span></h2>
+      <p class="rec-intro">{c.record.intro}</p>
+    </div>
+    <div class="rec-viewport">
+      <div class="rec-track">
+        {c.record.items.map((item, i) => (
+          <article class="rec-panel">
+            <div class="rec-panel-text">
+              <div class="rec-top">
+                <div class="rec-stat">{item.stat}</div>
+                <div>
+                  <h3 class="rec-item-title">{item.title}</h3>
+                  <p class="rec-desc">{item.desc}</p>
+                </div>
+              </div>
+              <ul class="rec-bullets">
+                {item.bullets.map((b) => (
+                  <li><span class="b-idx mono">—</span><span set:html={b} /></li>
+                ))}
+              </ul>
+            </div>
+            <div class="rec-panel-media">
+              {item.photoAlt ? (
+                <>
+                <span class="rec-ghost" aria-hidden="true">{item.stat}</span>
+                <figure class="rec-photo photo-frame">
+                  <div class="rec-image">
+                    <Picture
+                      src={photos[i]}
+                      alt={item.photoAlt}
+                      formats={['avif', 'webp']}
+                      widths={[600, 1000]}
+                      sizes="(min-width: 1024px) 30vw, 90vw"
+                      style={`object-position:${positions[i]};`}
+                      loading="lazy"
+                      data-velocity-skew
+                    />
+                  </div>
+                  <figcaption class="rec-caption mono">{item.title}</figcaption>
+                </figure>
+                </>
+              ) : (
+                <figure class="rec-poster photo-frame" aria-hidden="true">
+                  <div class="rec-poster-body"><span class="rec-poster-stat">{item.stat}</span></div>
+                  <figcaption class="rec-caption mono">{item.title}</figcaption>
+                </figure>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .record { padding-block: 0; }
+  .record-stage {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    padding-top: clamp(80px, 12vh, 120px);
+  }
+  .rec-head { width: 100%; }
+  .rec-head-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-top: 1px solid var(--line-c);
+    padding-top: 18px;
+  }
+  .index { color: var(--accent); }
+  .rec-title {
+    font-family: var(--font-display), serif;
+    font-weight: 400;
+    font-size: var(--display-l);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-top: clamp(20px, 3vw, 40px);
+  }
+  .rec-intro {
+    margin-top: 14px;
+    color: var(--fg-dim);
+    font-size: clamp(15px, 1.25vw, 18px);
+    max-width: 52ch;
+  }
+  .rec-progress {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .rec-counter { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .rec-counter-window { display: inline-block; height: 1.2em; line-height: 1.2; overflow: hidden; vertical-align: bottom; }
+  .rec-counter-roll, .rec-counter-roll span { display: block; }
+  .rec-bar {
+    width: clamp(80px, 10vw, 160px);
+    height: 1px;
+    background: var(--line-c);
+    position: relative;
+  }
+  .rec-bar-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+  .rec-viewport { flex: 1; display: flex; align-items: stretch; overflow: hidden; margin-top: clamp(24px, 3vw, 48px); min-height: 0; }
+  .rec-track {
+    display: flex;
+    height: 100%;
+    will-change: transform;
+  }
+  .rec-panel {
+    flex: 0 0 auto;
+    width: min(72vw, 980px);
+    border-left: 1px solid var(--line-c);
+    padding: clamp(18px, 2.4vw, 36px) var(--gutter);
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    grid-template-rows: minmax(0, 1fr);
+    gap: clamp(20px, 2.6vw, 44px);
+    min-height: 0;
+  }
+  .rec-panel:first-child { border-left: none; }
+  .rec-panel-text {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+  }
+  .rec-top { display: flex; flex-direction: column; gap: 10px; }
+  .rec-stat {
+    font-family: var(--font-display), serif;
+    font-style: italic;
+    color: var(--accent);
+    font-size: clamp(72px, 9vw, 150px);
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+  }
+  .rec-item-title { font-weight: 500; font-size: 22px; }
+  .rec-desc { color: var(--fg-dim); margin-top: 8px; font-size: 15px; line-height: 1.5; max-width: 44ch; }
+  .rec-bullets { list-style: none; margin-top: 16px; overflow: hidden; min-height: 0; }
+  .rec-bullets li {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line-c);
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--fg-dim);
+  }
+  .rec-bullets li :global(b) { font-weight: 500; color: var(--fg); }
+  .b-idx { color: var(--accent); flex: 0 0 auto; }
+  .rec-panel-media { position: relative; min-width: 0; min-height: 0; display: flex; }
+  .rec-ghost {
+    position: absolute; left: 0; bottom: 0; z-index: 0; pointer-events: none;
+    font-family: var(--font-display), serif; font-size: clamp(160px, 16vw, 260px); line-height: .85;
+    color: transparent; -webkit-text-stroke: 1px var(--line-c); white-space: nowrap;
+  }
+  .rec-photo {
+    position: relative;
+    z-index: 1;
+    width: calc(100% - 36px);
+    height: calc(100% - 48px);
+    margin: 0 0 48px 36px;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .rec-image { flex: 1; min-height: 0; overflow: hidden; }
+  .rec-caption { flex: none; margin: 8px 2px 2px; color: var(--fg-dim); font-size: 10px; line-height: 1.3; }
+  .rec-photo :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    will-change: transform;
+  }
+  .rec-poster {
+    width: 100%;
+    height: 100%;
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+  }
+  .rec-poster-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .rec-poster-stat {
+    font-family: var(--font-display), serif;
+    font-size: clamp(120px, 20vw, 300px);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--fg);
+    transform: rotate(-90deg);
+    white-space: nowrap;
+    opacity: 0.6;
+  }
+
+  .rec-static .rec-viewport { overflow: visible; }
+  .rec-static .rec-track { flex-direction: column; height: auto; }
+  .rec-static .rec-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--line-c);
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+  .rec-static .rec-panel:first-child { border-top: none; }
+  .rec-static .rec-bullets { overflow: visible; }
+  .rec-static .rec-photo { height: auto; }
+  .rec-static .rec-photo :global(img) { height: auto; }
+  .rec-static .rec-poster { min-height: 200px; }
+  .rec-static .rec-poster-stat { transform: none; }
+  .rec-static .rec-progress { display: none; }
+
+  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+    .record-stage {
+      height: 100svh;
+      min-height: 0;
+      padding-top: clamp(72px, 9vh, 96px);
+      padding-bottom: clamp(24px, 3vh, 40px);
+    }
+    .rec-head {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: baseline;
+      column-gap: 32px;
+    }
+    .rec-head-top { grid-column: 1 / -1; }
+    .rec-title { margin-top: 18px; }
+    .rec-intro { margin-top: 18px; max-width: 44ch; }
+    .rec-viewport { flex: 1 1 0; margin-top: clamp(16px, 2vh, 24px); }
+    .rec-track { perspective: 1400px; }
+    .rec-panel { padding-block: clamp(16px, 2vh, 24px); transform-style: preserve-3d; will-change: transform; transform-origin: 50% 50%; }
+    .rec-stat { font-size: clamp(56px, 6.5vw, 104px); perspective: 800px; }
+    .rec-item-title { font-size: 20px; }
+    .rec-desc { font-size: 14px; }
+    .rec-bullets { margin-top: 12px; }
+    .rec-bullets li { color: var(--fg-faint); padding: 8px 0; transition: color .35s; }
+    .rec-panel.is-centered .rec-bullets li { color: var(--fg-dim); }
+  }
+
+  @media (min-width: 1024px) and (max-height: 760px) and (prefers-reduced-motion: no-preference) {
+    .rec-stat { font-size: clamp(56px, 5.8vw, 104px); }
+  }
+
+  @media (max-width: 1023px) {
+    .record-stage { min-height: 0; }
+    .rec-viewport { overflow: visible; }
+    .rec-track { flex-direction: column; height: auto; }
+    .rec-panel { width: 100%; border-left: none; border-top: 1px solid var(--line-c); grid-template-columns: 1fr; grid-template-rows: auto; }
+    .rec-panel:first-child { border-top: none; }
+    .rec-bullets { overflow: visible; }
+    .rec-photo { height: auto; }
+    .rec-photo :global(img) { height: auto; }
+    .rec-poster { min-height: 200px; }
+    .rec-poster-stat { transform: none; }
+    .rec-progress { display: none; }
+  }
+  @media (max-width: 820px) {
+    .record-stage { padding-block: clamp(72px, 16vw, 120px); }
+    .rec-track { gap: 24px; }
+  }
+</style>

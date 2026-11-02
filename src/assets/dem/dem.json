@@ -1,0 +1,112 @@
+[
+  {
+    "id": "traunstein",
+    "lat": 47.8733,
+    "lon": 13.8367,
+    "boxKm": 7,
+    "min": 422,
+    "max": 1686,
+    "base": 422,
+    "summit": {
+      "col": 136,
+      "row": 128,
+      "elev": 1686
+    }
+  },
+  {
+    "id": "gerlach",
+    "lat": 49.1644,
+    "lon": 20.1339,
+    "boxKm": 10,
+    "min": 934,
+    "max": 2605,
+    "base": 1028,
+    "summit": {
+      "col": 128,
+      "row": 130,
+      "elev": 2605
+    }
+  },
+  {
+    "id": "montblanc",
+    "lat": 45.845,
+    "lon": 6.835,
+    "boxKm": 14,
+    "min": 896,
+    "max": 4788,
+    "base": 1023,
+    "summit": {
+      "col": 169,
+      "row": 153,
+      "elev": 4788
+    },
+    "route": [
+      {
+        "name": "Nid d'Aigle",
+        "lat": 45.8485,
+        "lon": 6.782,
+        "known": 2372,
+        "col": 50,
+        "row": 117,
+        "elev": 2375,
+        "snapped": true,
+        "originalElev": 2595
+      },
+      {
+        "name": "Refuge de Tête Rousse",
+        "lat": 45.8508,
+        "lon": 6.814,
+        "known": 3167,
+        "col": 100,
+        "row": 111,
+        "elev": 3018,
+        "snapped": true,
+        "originalElev": 2898
+      },
+      {
+        "name": "Refuge du Goûter",
+        "lat": 45.8505,
+        "lon": 6.831,
+        "known": 3835,
+        "col": 122,
+        "row": 116,
+        "elev": 3801,
+        "snapped": false,
+        "originalElev": 3801
+      },
+      {
+        "name": "Dôme du Goûter",
+        "lat": 45.8427,
+        "lon": 6.843,
+        "known": 4304,
+        "col": 139,
+        "row": 132,
+        "elev": 4278,
+        "snapped": false,
+        "originalElev": 4278
+      },
+      {
+        "name": "Refuge Vallot",
+        "lat": 45.8388,
+        "lon": 6.8512,
+        "known": 4362,
+        "col": 150,
+        "row": 140,
+        "elev": 4301,
+        "snapped": false,
+        "originalElev": 4301
+      },
+      {
+        "name": "Mont Blanc",
+        "lat": 45.8326,
+        "lon": 6.8652,
+        "known": 4808,
+        "col": 170,
+        "row": 153,
+        "elev": 4783,
+        "snapped": false,
+        "originalElev": 4783
+      }
+    ]
+  }
+]

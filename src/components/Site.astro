@@ -1,0 +1,34 @@
+---
+import type { SiteContent } from '../content/site';
+import Preloader from './Preloader.astro';
+import Header from './Header.astro';
+import Hero from './Hero.astro';
+import About from './About.astro';
+import Record from './Record.astro';
+import Work from './Work.astro';
+import Research from './Research.astro';
+import Summit from './Summit.astro';
+import Skills from './Skills.astro';
+import Experience from './Experience.astro';
+import Contact from './Contact.astro';
+
+interface Props { c: SiteContent; lang: 'en' | 'sk' }
+const { c, lang } = Astro.props;
+---
+<Preloader name={`${c.hero.nameFirst} ${c.hero.nameLast}`} />
+<Header c={c} lang={lang} />
+<main id="main">
+  <Hero c={c} />
+  <About c={c} />
+  <Record c={c} />
+  <Work c={c} />
+  <Research c={c} />
+  <Summit c={c} />
+  <Skills c={c} />
+  <Experience c={c} />
+  <Contact c={c} />
+</main>
+
+<script>
+  import '../scripts/main';
+</script>
