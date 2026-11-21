@@ -250,6 +250,17 @@ const stageValue = { idea: 1, concept: 2, prototype: 3, live: 4 };
   .w-tile-inner :global(.aim-lines) { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
   .w-tile-inner :global(.aim-lines path) { fill: none; stroke: var(--accent); stroke-width: .6; opacity: .75; vector-effect: non-scaling-stroke; }
   .w-tile-inner :global(.aim-badge) { position: absolute; right: 8px; top: 7px; border: 1px solid var(--accent); color: #be3312; background: #f6f3ec; font-size: 7px; padding: 3px 4px; transform-origin: top; }
+  .w-tile-inner :global(.vb-layout) { position: absolute; inset: 0; padding: 14px 16px 38px; display: grid; grid-template-rows: auto repeat(6, minmax(15px, 1fr)); align-items: center; font-family: var(--font-mono), monospace; color: var(--text); }
+  .w-tile-inner :global(.vb-head) { font-size: 9px; opacity: .55; padding-bottom: 6px; margin-bottom: 2px; border-bottom: 1px solid rgba(239,234,224,.14); }
+  .w-tile-inner :global(.vb-row) { display: grid; grid-template-columns: 30px 20px minmax(0, 1fr) 26% 12px; align-items: center; gap: 8px; height: 100%; font-size: 8px; }
+  .w-tile-inner :global(.vb-row + .vb-row) { border-top: 1px solid rgba(239,234,224,.06); }
+  .w-tile-inner :global(.vb-idx) { opacity: .4; }
+  .w-tile-inner :global(.vb-lang) { color: var(--accent); }
+  .w-tile-inner :global(.vb-text i) { display: block; height: 3px; background: rgba(239,234,224,.22); transform-origin: left; }
+  .w-tile-inner :global(.vb-wave) { display: flex; align-items: center; justify-content: space-between; height: 12px; }
+  .w-tile-inner :global(.vb-wave i) { flex: 0 0 2px; border-radius: 1px; background: var(--accent); transform-origin: center; }
+  .w-tile-inner :global(.vb-ok) { color: var(--accent); font-size: 9px; text-align: right; }
+  .w-tile-inner :global(.vb-count) { position: absolute; left: 16px; bottom: 12px; font-size: 11px; white-space: nowrap; }
   .w-tile-inner :global(.gry-title) { position: absolute; left: 16px; bottom: 34px; width: 19%; z-index: 2; color: #39ff14; font-family: var(--font-display), serif; font-style: italic; font-size: clamp(18px, 1.6vw, 26px); line-height: .95; text-shadow: 0 0 18px rgba(57,255,20,.55); }
   .w-tile-inner :global(.gry-locked) { animation: gry-flicker 3.5s infinite; }
   .w-tile-inner :global(.gry-count) { position: absolute; left: 16px; bottom: 16px; z-index: 2; color: rgba(57,255,20,.8); font-family: var(--font-mono), monospace; font-size: 11px; white-space: nowrap; }

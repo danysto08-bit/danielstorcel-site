@@ -112,7 +112,121 @@ export function createTile(kind: Item['tile'], root: HTMLElement, copy: Copy, op
   };
   readPalette();
 
-  if (kind === 'carbontrail') {
+  if (kind === 'voicebatch') {
+    const layout = document.createElement('div');
+    layout.className = 'vb-layout';
+    const head = document.createElement('div');
+    head.className = 'vb-head';
+    head.textContent = copy.voicebatchSource;
+    layout.append(head);
+    const langs = ['SK', 'EN', 'DE', 'CS', 'PL', 'HU'];
+    const widths = [72, 54, 86, 61, 78, 47];
+    const rows: HTMLElement[] = [];
+    langs.forEach((lang, i) => {
+      const row = document.createElement('div');
+      row.className = 'vb-row';
+      const wave = Array.from({ length: 14 }, (_, n) => `<i style="height:${20 + Math.round(Math.abs(Math.sin((n + 1) * (i + 2) * .9)) * 80)}%"></i>`).join('');
+      row.innerHTML = `<span class="vb-idx">${String(412 + i).padStart(4, '0')}</span><span class="vb-lang">${lang}</span><span class="vb-text"><i style="width:${widths[i]}%"></i></span><span class="vb-wave">${wave}</span><span class="vb-ok">✓</span>`;
+      layout.append(row);
+      rows.push(row);
+    });
+    const count = document.createElement('div');
+    count.className = 'vb-count';
+    layout.append(count);
+    inner.append(layout);
+    const texts = layout.querySelectorAll('.vb-text i');
+    const waves = rows.map((row) => row.querySelectorAll('.vb-wave i'));
+    const oks = layout.querySelectorAll('.vb-ok');
+    const number = { value: 0 };
+    const update = () => {
+      const value = Math.round(number.value);
+      count.textContent = `${value.toLocaleString('en-US').replace(/,/g, ' ')}${value >= 8000 ? '+' : ''} ${copy.voicebatchRecordings}`;
+    };
+    make = () => {
+      const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 })
+        .set(layout, { opacity: 1 })
+        .fromTo(rows, { opacity: 0, x: -6 }, { opacity: 1, x: 0, stagger: .06, duration: .3 })
+        .fromTo(texts, { scaleX: 0 }, { scaleX: 1, stagger: .06, duration: .35, ease: 'power2.out' }, '<');
+      waves.forEach((bars, i) => {
+        tl.fromTo(bars, { scaleY: 0 }, { scaleY: 1, stagger: .015, duration: .25, ease: 'power2.out' }, .6 + i * .18)
+          .fromTo(oks[i], { opacity: 0, scale: .4 }, { opacity: 1, scale: 1, duration: .25, ease: 'back.out(2)' }, .8 + i * .18);
+      });
+      return tl
+        .fromTo(number, { value: 0 }, { value: 8000, duration: 1.8, ease: 'expo.out', onUpdate: update }, .6)
+        .to(layout, { opacity: 0, duration: .4 }, '+=2.5');
+    };
+    setFinal = () => {
+      gsap.set(layout, { opacity: 1 }); gsap.set(rows, { opacity: 1, x: 0 }); gsap.set(texts, { scaleX: 1 });
+      waves.forEach((bars) => gsap.set(bars, { scaleY: 1 })); gsap.set(oks, { opacity: 1, scale: 1 });
+      number.value = 8000; update();
+    };
+  } else if (kind === 'energy') {
+    const state = { bars: 0, line: 0, buy: 0, alpha: 1 };
+    const hours = 24;
+    const price = Array.from({ length: hours }, (_, h) =>
+      .42 + .2 * Math.exp(-((h - 8) ** 2) / 5) + .3 * Math.exp(-((h - 19) ** 2) / 4) - .22 * Math.exp(-((h - 13) ** 2) / 6) - .16 * Math.exp(-((h - 3) ** 2) / 6));
+    const load = Array.from({ length: hours }, (_, h) => .35 + .4 * Math.exp(-((h - 11) ** 2) / 18) + .12 * Math.exp(-((h - 18) ** 2) / 6));
+    const cheapest = new Set([...price.keys()].sort((a, b) => price[a] - price[b]).slice(0, 7));
+    const canvas = createCanvas(inner, (ctx, w, h) => {
+      ctx.clearRect(0, 0, w, h);
+      const left = 16, right = w - 16, top = 38, bottom = h - 26;
+      const step = (right - left) / hours, barW = step * .58;
+      const y = (v: number) => bottom - v * (bottom - top);
+      ctx.globalAlpha = state.alpha * .25; ctx.strokeStyle = palette.fg; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(left, bottom + .5); ctx.lineTo(right, bottom + .5); ctx.stroke();
+      for (let i = 0; i < hours; i++) {
+        const grow = Math.max(0, Math.min(1, state.bars * hours - i));
+        if (!grow) continue;
+        const x = left + i * step + (step - barW) / 2, top0 = y(load[i] * .55 * grow);
+        const buying = cheapest.has(i) && state.buy > 0;
+        ctx.globalAlpha = state.alpha * (buying ? Math.min(1, state.buy * 1.5) : .22);
+        ctx.fillStyle = buying ? palette.accent : palette.fg;
+        ctx.fillRect(x, top0, barW, bottom - top0);
+      }
+      const drawn = Math.floor(state.line * (hours - 1) * 8);
+      if (drawn > 0) {
+        ctx.globalAlpha = state.alpha; ctx.strokeStyle = palette.fg; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        for (let s = 0; s <= drawn; s++) {
+          const t = s / 8, k = Math.min(hours - 2, Math.floor(t)), f = t - k;
+          const v = price[k] + (price[k + 1] - price[k]) * (f * f * (3 - 2 * f));
+          const px = left + (t + .5) * step, py = y(v);
+          if (s === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+      if (state.buy > 0) {
+        ctx.globalAlpha = state.alpha * Math.min(1, state.buy * 1.5); ctx.fillStyle = palette.accent;
+        cheapest.forEach((i) => { ctx.beginPath(); ctx.arc(left + (i + .5) * step, y(price[i]), 2.6, 0, Math.PI * 2); ctx.fill(); });
+      }
+      ctx.globalAlpha = state.alpha; ctx.font = '9px monospace'; ctx.textBaseline = 'middle';
+      const legend: [string, string, 'line' | 'bar'][] = [[copy.energyPrice, palette.fg, 'line'], [copy.energyLoad, palette.fg, 'bar'], [copy.energyBuy, palette.accent, 'bar']];
+      let lx = left;
+      legend.forEach(([label, color, kindOf], i) => {
+        ctx.globalAlpha = state.alpha * (i === 1 ? .5 : 1) * (i === 2 ? Math.min(1, state.buy * 1.5) : 1);
+        ctx.fillStyle = color; ctx.strokeStyle = color;
+        if (kindOf === 'line') { ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(lx, 16); ctx.lineTo(lx + 12, 16); ctx.stroke(); }
+        else ctx.fillRect(lx + 3, 12, 6, 8);
+        ctx.globalAlpha = state.alpha * (i === 2 ? Math.min(1, state.buy * 1.5) : .75); ctx.fillStyle = palette.fg;
+        ctx.fillText(label, lx + 17, 16);
+        lx += 17 + ctx.measureText(label).width + 14;
+      });
+      ctx.globalAlpha = state.alpha * .5; ctx.fillStyle = palette.fg;
+      ['00', '06', '12', '18', '24'].forEach((label, i) => {
+        ctx.textAlign = i === 0 ? 'left' : i === 4 ? 'right' : 'center';
+        ctx.fillText(label, left + i * (right - left) / 4, h - 12);
+      });
+      ctx.globalAlpha = 1; ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+    });
+    resize = canvas.resize;
+    make = () => gsap.timeline({ repeat: -1, repeatDelay: 2.5, onUpdate: canvas.draw })
+      .set(state, { bars: 0, line: 0, buy: 0, alpha: 1 })
+      .to(state, { bars: 1, duration: 1.1, ease: 'none' })
+      .to(state, { line: 1, duration: 1.4, ease: 'none' }, '-=.4')
+      .to(state, { buy: 1, duration: .6, ease: 'none' })
+      .to(state, { alpha: 0, duration: .4 }, '+=2.5');
+    setFinal = () => { Object.assign(state, { bars: 1, line: 1, buy: 1, alpha: 1 }); canvas.resize(); };
+  } else if (kind === 'carbontrail') {
     const path = inner.querySelector<SVGPathElement>('.carbon-trail path')!;
     const b = inner.querySelector<HTMLElement>('.carbon-cell.is-b')!;
     const length = path.getTotalLength();

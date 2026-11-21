@@ -68,11 +68,13 @@ export interface SiteContent {
     tileCopy: {
       aimtoruContradiction: string; aimtoruFacts: string; mountainsTags: string[];
       taroCaption: string; grynadeLine: string; grynadeLikes: string; carbonLabel: string;
+      voicebatchRecordings: string; voicebatchSource: string;
+      energyPrice: string; energyLoad: string; energyBuy: string;
     };
     items: {
       name: string;
       status: string;
-      tile: 'carbontrail' | 'aimtoru' | 'grynade' | 'taro' | 'mountains';
+      tile: 'voicebatch' | 'energy' | 'carbontrail' | 'aimtoru' | 'grynade' | 'taro' | 'mountains';
       stage: 'idea' | 'concept' | 'prototype' | 'live';
       desc: string;
       part: string; // supports <b>
@@ -255,10 +257,10 @@ export const content: Record<Lang, SiteContent> = {
       ],
     },
     work: {
-      intro: 'Startup concepts, brand experiments, and ideas I keep coming back to.',
+      intro: 'Software that companies use, startup concepts, brand experiments, and ideas I keep coming back to.',
       stages: { idea: 'Idea', concept: 'Concept', prototype: 'Prototype', live: 'Live' },
       score: [
-        { value: '05', label: 'projects' }, { value: '01', label: 'award' },
+        { value: '07', label: 'projects' }, { value: '01', label: 'award' },
         { value: '01', label: 'honorable mention' }, { value: '10k', label: 'TikTok likes' },
       ],
       tileCopy: {
@@ -266,8 +268,26 @@ export const content: Record<Lang, SiteContent> = {
         mountainsTags: ['Route · 6.4 km', 'Gear · −30 %', 'Hut · 2 beds'],
         taroCaption: 'Erasmus+ → expedition', grynadeLine: 'STAY LOCKED IN.',
         grynadeLikes: 'likes', carbonLabel: 'Winners · JA Europe Foodathon',
+        voicebatchRecordings: 'recordings', voicebatchSource: 'scripts.xlsx',
+        energyPrice: 'Market price', energyLoad: 'Forecast use', energyBuy: 'Buy',
       },
       items: [
+        {
+          name: 'Voicebatch',
+          status: 'In use',
+          tile: 'voicebatch', stage: 'live',
+          desc: "A Python tool I built for Geniuso s.r.o. that lets their non-technical content team generate multilingual voice recordings with the ElevenLabs API straight from Excel. Still in use and on track for 8,000+ recordings, roughly 130–270 hours of manual work automated.",
+          part: '<b>My part:</b> everything, end to end: the fault-tolerant pipeline (incremental generation with SHA-256 fingerprints, resumable jobs), concurrent processing with adaptive rate limiting and retries, and cost reporting.',
+          skills: ['Python', 'APIs', 'Automation', 'Reliability'],
+        },
+        {
+          name: 'Energy procurement',
+          status: 'Ongoing',
+          tile: 'energy', stage: 'prototype',
+          desc: 'An optimization algorithm that minimizes how much businesses pay for electricity. It combines a company’s forecasted consumption with market price data to decide how much to buy, when, and on which market. Currently in testing on real data from six companies.',
+          part: '<b>My part:</b> designing and building the algorithm, from the optimization model to testing it on real company data.',
+          skills: ['Numerical optimization', 'Predictive analytics', 'Energy markets'],
+        },
         {
           name: 'CarbonTrail',
           status: 'Award-winning',
@@ -280,7 +300,7 @@ export const content: Record<Lang, SiteContent> = {
           name: 'TORU',
           status: 'Honorable mention',
           tile: 'aimtoru', stage: 'prototype',
-          desc: 'A clinical workspace built with my team at the Clinical AI Hackathon in Vienna (AIM Austria), where it earned an honorable mention. A clinician enters the patient and their role and task; the app pulls the task-relevant facts out of scattered medical records — every fact linked to its exact source passage, contradictions between documents flagged, and a dated timeline of the records.',
+          desc: 'A clinical workspace built with my team at the Clinical AI Hackathon in Vienna (AIM Austria), in the IBM track for Austrian healthcare, where it earned an honorable mention. A clinician enters the patient and their role and task; the app pulls the task-relevant facts out of scattered medical records — every fact linked to its exact source passage, contradictions between documents flagged, and a dated timeline of the records.',
           part: '<b>My part:</b> the front-end, and the voice-over for the introduction video.',
           skills: ['Frontend', 'UX', 'Voice-over', 'Health data'],
           link: { href: 'https://aimtoru-eight.vercel.app', label: 'aimtoru-eight.vercel.app ↗' },
@@ -591,10 +611,10 @@ export const content: Record<Lang, SiteContent> = {
       ],
     },
     work: {
-      intro: 'Startupové koncepty, experimenty so značkou a nápady, ku ktorým sa stále vraciam.',
+      intro: 'Softvér, ktorý firmy používajú, startupové koncepty, experimenty so značkou a nápady, ku ktorým sa stále vraciam.',
       stages: { idea: 'Nápad', concept: 'Koncept', prototype: 'Prototyp', live: 'Naživo' },
       score: [
-        { value: '05', label: 'projektov' }, { value: '01', label: 'ocenenie' },
+        { value: '07', label: 'projektov' }, { value: '01', label: 'ocenenie' },
         { value: '01', label: 'čestné uznanie' }, { value: '10k', label: 'lajkov na TikToku' },
       ],
       tileCopy: {
@@ -602,8 +622,26 @@ export const content: Record<Lang, SiteContent> = {
         mountainsTags: ['Trasa · 6,4 km', 'Výbava · −30 %', 'Chata · 2 lôžka'],
         taroCaption: 'Erasmus+ → expedícia', grynadeLine: 'STAY LOCKED IN.',
         grynadeLikes: 'lajkov', carbonLabel: 'Víťazi · JA Europe Foodathon',
+        voicebatchRecordings: 'nahrávok', voicebatchSource: 'scripts.xlsx',
+        energyPrice: 'Trhová cena', energyLoad: 'Predpoveď spotreby', energyBuy: 'Nákup',
       },
       items: [
+        {
+          name: 'Voicebatch',
+          status: 'V používaní',
+          tile: 'voicebatch', stage: 'live',
+          desc: 'Nástroj v Pythone, ktorý som postavil pre Geniuso s.r.o. Ich netechnický obsahový tím vďaka nemu generuje viacjazyčné hlasové nahrávky cez ElevenLabs API priamo z Excelu. Stále sa používa a smeruje k 8 000+ nahrávkam, čo je zhruba 130–270 hodín automatizovanej manuálnej práce.',
+          part: '<b>Moja časť:</b> celé od začiatku do konca: odolná pipeline (inkrementálne generovanie pomocou SHA-256 odtlačkov, obnoviteľné úlohy), paralelné spracovanie s adaptívnym obmedzovaním požiadaviek a opakovaniami a reporty nákladov.',
+          skills: ['Python', 'API', 'Automatizácia', 'Spoľahlivosť'],
+        },
+        {
+          name: 'Nákup energie',
+          status: 'Prebieha',
+          tile: 'energy', stage: 'prototype',
+          desc: 'Optimalizačný algoritmus, ktorý znižuje, koľko firmy platia za elektrinu. Spája predpovedanú spotrebu firmy s trhovými cenami a rozhoduje, koľko elektriny kúpiť, kedy a na ktorom trhu. Momentálne ho testujem na reálnych dátach zo šiestich firiem.',
+          part: '<b>Moja časť:</b> návrh a vývoj algoritmu, od optimalizačného modelu až po testovanie na reálnych dátach firiem.',
+          skills: ['Numerická optimalizácia', 'Prediktívna analytika', 'Energetické trhy'],
+        },
         {
           name: 'CarbonTrail',
           status: 'Ocenený',
@@ -616,7 +654,7 @@ export const content: Record<Lang, SiteContent> = {
           name: 'TORU',
           status: 'Čestné uznanie',
           tile: 'aimtoru', stage: 'prototype',
-          desc: 'Klinické pracovné prostredie, ktoré sme s tímom postavili na Clinical AI Hackathone vo Viedni (AIM Austria), kde získalo čestné uznanie. Lekár zadá pacienta a svoju rolu a úlohu; aplikácia vytiahne z roztrúsených zdravotných záznamov fakty podstatné pre danú úlohu — každý fakt je prepojený na presnú pasáž v zdroji, rozpory medzi dokumentmi sú označené a záznamy sú zoradené na datovanej časovej osi.',
+          desc: 'Klinické pracovné prostredie, ktoré sme s tímom postavili na Clinical AI Hackathone vo Viedni (AIM Austria) v IBM sekcii pre rakúske zdravotníctvo, kde získalo čestné uznanie. Lekár zadá pacienta a svoju rolu a úlohu; aplikácia vytiahne z roztrúsených zdravotných záznamov fakty podstatné pre danú úlohu — každý fakt je prepojený na presnú pasáž v zdroji, rozpory medzi dokumentmi sú označené a záznamy sú zoradené na datovanej časovej osi.',
           part: '<b>Moja časť:</b> front-end a voiceover k úvodnému videu.',
           skills: ['Frontend', 'UX', 'Voiceover', 'Zdravotné dáta'],
           link: { href: 'https://aimtoru-eight.vercel.app', label: 'aimtoru-eight.vercel.app ↗' },
